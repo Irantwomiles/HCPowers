@@ -1,0 +1,9 @@
+name: HCPowers
+main: com.hcpowers.core.Core
+author: Irantwomiles
+description: Just desting
+version: 1.0
+commands:
+  faction:
+    description: create a faction
+    aliases: [f, t, team]

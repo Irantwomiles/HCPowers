@@ -1,0 +1,2 @@
+Faction Admins:
+- hcpower.factions.admin
