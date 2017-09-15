@@ -134,6 +134,10 @@ public class FactionCommands implements CommandExecutor {
 
            }
 
+           if(args[0].equalsIgnoreCase("map")) {
+               
+           }
+
            if(args[0].equalsIgnoreCase("claim")) {
 
                ItemStack wand = new ItemStack(Material.STICK, 1);
