@@ -6,14 +6,15 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 
-public class BreakBlocksInClaim implements Listener {
+public class PlaceBlocksInClaim implements Listener {
 
     @EventHandler
-    public void onBreak(BlockBreakEvent event) {
+    public void onPlace(BlockPlaceEvent event) {
 
         Player player = event.getPlayer();
+
 
         if(FactionManager.getManager().insideClaim(event.getBlock().getLocation())) {
             Faction faction = FactionManager.getManager().getClaimByLocation(event.getBlock().getLocation());
@@ -29,7 +30,7 @@ public class BreakBlocksInClaim implements Listener {
 
         if(!FactionManager.getManager().isPlayerInFaction(player)) {
             if(FactionManager.getManager().insideClaim(event.getBlock().getLocation())) {
-                player.sendMessage(ChatColor.RED + "Can't break blocks in the claim of " + ChatColor.LIGHT_PURPLE + FactionManager.getManager().getClaimByLocation(event.getBlock().getLocation()).getName());
+                player.sendMessage(ChatColor.RED + "Can't place blocks in the claim of " + ChatColor.LIGHT_PURPLE + FactionManager.getManager().getClaimByLocation(event.getBlock().getLocation()).getName());
                 event.setCancelled(true);
                 return;
             }
@@ -41,11 +42,11 @@ public class BreakBlocksInClaim implements Listener {
             Faction pfaction = FactionManager.getManager().getFactionByPlayer(player);
 
             if(!pfaction.getName().equalsIgnoreCase(bfaction.getName()) && !pfaction.isRaidable()) {
-                player.sendMessage(ChatColor.RED + "Can't break blocks in the claim of " + ChatColor.LIGHT_PURPLE + bfaction.getName());
+                player.sendMessage(ChatColor.RED + "Can't place blocks in the claim of " + ChatColor.LIGHT_PURPLE + bfaction.getName());
                 event.setCancelled(true);
                 return;
             }
         }
-
     }
+
 }

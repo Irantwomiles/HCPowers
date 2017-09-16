@@ -2,10 +2,8 @@ package com.hcpowers.core;
 
 import com.hcpowers.factions.FactionManager;
 import com.hcpowers.factions.commands.FactionCommands;
-import com.hcpowers.factions.events.BreakBlocksInClaim;
-import com.hcpowers.factions.events.ClaimEvent;
-import com.hcpowers.factions.events.PlayerEnterClaimEvent;
-import com.hcpowers.factions.events.PlayerLeaveClaimEvent;
+import com.hcpowers.factions.events.*;
+import com.hcpowers.factions.runnables.FactionRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -19,6 +17,8 @@ public class Core extends JavaPlugin {
 
     private static Core instance;
 
+    private FactionRunnable factionRunnable = new FactionRunnable();
+
     public void onEnable() {
 
         instance = this;
@@ -29,6 +29,8 @@ public class Core extends JavaPlugin {
 
         registerCommands();
         registerEvents();
+
+        factionRunnable.runTaskTimer(this, 20, 20);
 
     }
 
@@ -90,6 +92,8 @@ public class Core extends JavaPlugin {
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerEnterClaimEvent(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerLeaveClaimEvent(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new BreakBlocksInClaim(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new PlaceBlocksInClaim(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new PlayerDeath(), this);
     }
 
     public static Core getInstance() {

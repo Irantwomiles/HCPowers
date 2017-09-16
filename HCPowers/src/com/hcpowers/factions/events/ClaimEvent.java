@@ -121,7 +121,11 @@ public class ClaimEvent implements Listener {
                         if(FactionManager.getManager().canClaim(claim.getLoc1(), claim.getLoc2())) {
                             claim.getFaction().setLoc1(claim.getLoc1());
                             claim.getFaction().setLoc2(claim.getLoc2());
+                            FactionCommands.getClaiming().remove(player.getName());
+
                             player.sendMessage(ChatColor.GOLD + "You have claimed this land for the System Faction " + ChatColor.YELLOW + claim.getFaction().getName());
+
+                            player.setItemInHand(null);
                         } else {
                             player.sendMessage(ChatColor.RED + "You can't claim this land");
                         }
@@ -133,6 +137,7 @@ public class ClaimEvent implements Listener {
                     if(claim.getFaction().getBalance() >= claimCost(claim.getLoc1(), claim.getLoc2())) {
 
                         if(FactionManager.getManager().canClaim(claim.getLoc1(), claim.getLoc2())) {
+
                             claim.getFaction().setLoc1(claim.getLoc1());
                             claim.getFaction().setLoc2(claim.getLoc2());
 
@@ -140,7 +145,10 @@ public class ClaimEvent implements Listener {
 
                             FactionManager.getManager().sendFactionMessage(ChatColor.GREEN + player.getName() + ChatColor.YELLOW + " has claim land for your faction", claim.getFaction());
 
+                            player.setItemInHand(null);
+
                             FactionCommands.getClaiming().remove(player.getName());
+
                         } else {
                             player.sendMessage(ChatColor.RED + "You can't claim this land");
                         }

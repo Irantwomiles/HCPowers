@@ -135,7 +135,18 @@ public class FactionCommands implements CommandExecutor {
            }
 
            if(args[0].equalsIgnoreCase("map")) {
-               
+
+           }
+
+           if(args[0].equalsIgnoreCase("who") || args[0].equalsIgnoreCase("show")) {
+
+               if (args.length < 2) {
+                   FactionManager.getManager().factionInfoByPlayer(player);
+                   return true;
+               }
+
+               FactionManager.getManager().factionInfoByName(player, args[1]);
+
            }
 
            if(args[0].equalsIgnoreCase("claim")) {
