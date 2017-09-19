@@ -1,5 +1,6 @@
 package com.hcpowers.factions.events;
 
+import com.hcpowers.core.utils.Utils;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
 import org.bukkit.ChatColor;
@@ -9,6 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 public class PlayerDeath implements Listener {
+
+    private Utils utils = new Utils();
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
@@ -23,7 +26,7 @@ public class PlayerDeath implements Listener {
 
             faction.setFreezetime(60 * 60);
 
-            FactionManager.getManager().sendFactionMessage(ChatColor.RED + player.getName() + ChatColor.YELLOW + " has died!" + ChatColor.GRAY + " (DTR: " + faction.getDtr() + ")", faction);
+            FactionManager.getManager().sendFactionMessage(ChatColor.RED + player.getName() + ChatColor.YELLOW + " has died!" + ChatColor.GRAY + " (DTR: " + utils.formatDouble(faction.getDtr()) + ")", faction);
 
         }
     }

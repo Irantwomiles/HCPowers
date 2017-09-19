@@ -23,6 +23,7 @@ public class FactionCommands implements CommandExecutor {
 
     private static HashMap<String, Claim> claiming = new HashMap<>();
     private static HashMap<String, ArrayList<Faction>> map = new HashMap<>();
+    private static ArrayList<String> chat = new ArrayList<>();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -78,6 +79,16 @@ public class FactionCommands implements CommandExecutor {
 
            }
 
+           if(args[0].equalsIgnoreCase("createsystem")) {
+
+               if(args.length < 2) {
+                   player.sendMessage(ChatColor.GRAY + "/f createsystem [name]");
+                   return true;
+               }
+
+               FactionManager.getManager().createSystemFaction(args[1], player);
+
+           }
 
            if(args[0].equalsIgnoreCase("disband")) {
 
@@ -169,11 +180,34 @@ public class FactionCommands implements CommandExecutor {
            if(args[0].equalsIgnoreCase("who") || args[0].equalsIgnoreCase("show")) {
 
                if (args.length < 2) {
-                   FactionManager.getManager().factionInfoByPlayer(player);
+                   FactionManager.getManager().factionInfoByPlayer(player, player);
                    return true;
                }
 
-               FactionManager.getManager().factionInfoByName(player, args[1]);
+               Player target = Bukkit.getPlayer(args[1]);
+
+               if(target == null) {
+                   FactionManager.getManager().factionInfoByName(player, args[1]);
+                   return true;
+               }
+
+               FactionManager.getManager().factionInfoByPlayer(player, target);
+           }
+
+           if(args[0].equalsIgnoreCase("chat")) {
+
+               if(!FactionManager.getManager().isPlayerInFaction(player)) {
+                   player.sendMessage(ChatColor.RED + "Must be in a faction to do this command");
+                   return true;
+               }
+
+               if(chat.contains(player.getName())) {
+                   chat.remove(player.getName());
+                   player.sendMessage(ChatColor.YELLOW + "Now talking in: " + ChatColor.WHITE + "Public Chat");
+               } else {
+                   chat.add(player.getName());
+                   player.sendMessage(ChatColor.YELLOW + "Now talking in: " + ChatColor.GREEN + "Faction Chat");
+               }
 
            }
 
@@ -273,4 +307,5 @@ public class FactionCommands implements CommandExecutor {
     public static HashMap<String, ArrayList<Faction>> getMap() {
         return map;
     }
+    public static ArrayList<String> getChat() {return chat;}
 }

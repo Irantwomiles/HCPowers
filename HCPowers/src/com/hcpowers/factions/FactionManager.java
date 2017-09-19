@@ -471,6 +471,35 @@ public class FactionManager {
         Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + ChatColor.YELLOW + " has created the faction " + ChatColor.RED + name);
     }
 
+    public void createSystemFaction(String name, Player player) {
+
+        String[] notAllowed = { ",", ";", "!", "@", "#", "$",
+                "%", "^", "&", "*", "(", ")", "+", "=", "`",
+                "~", ".", "<", ">", "/", "\"", ":", ";", "{",
+                "}", "?" };
+
+        for(String no : notAllowed) {
+            if (name.contains(no)) {
+                player.sendMessage(ChatColor.RED + "You can't use those characters in your faction name");
+                return;
+            }
+        }
+
+        if(getFactionByName(name) != null) {
+            player.sendMessage(ChatColor.RED + "A faction by that name already exists!");
+            return;
+        }
+
+
+        Faction faction = new Faction(name);
+
+        faction.setSystem(true);
+
+        factions.add(faction);
+
+        Bukkit.broadcastMessage(ChatColor.GREEN + player.getName() + ChatColor.YELLOW + " has created the faction " + ChatColor.RED + name);
+    }
+
     public void disbandFactionByName(String name, Player player) {
 
         if(getFactionByName(name) == null) {
@@ -600,6 +629,7 @@ public class FactionManager {
         if(faction.getLeader().equals(player.getUniqueId().toString()) || faction.getCaptains().contains(player.getUniqueId().toString())) {
 
             if(!faction.getMembers().contains(target.getUniqueId().toString()) && !faction.getInvites().contains(player.getUniqueId().toString())) {
+                faction.getInvites().add(target.getUniqueId().toString());
                 sendFactionMessage(ChatColor.GREEN + player.getName() + ChatColor.YELLOW + " has invited " + ChatColor.GOLD + target.getName(), faction);
                 target.sendMessage(ChatColor.YELLOW + "You have been invited to join the faction " + ChatColor.GREEN + faction.getName() + ".");
             } else {
@@ -626,6 +656,7 @@ public class FactionManager {
         if(faction.getLeader().equals(player.getUniqueId().toString()) || faction.getCaptains().contains(player.getUniqueId().toString())) {
 
             if(!faction.getMembers().contains(target.getUniqueId().toString()) && faction.getInvites().contains(player.getUniqueId().toString())) {
+                faction.getInvites().remove(target.getUniqueId().toString());
                 sendFactionMessage(ChatColor.GREEN + player.getName() + ChatColor.YELLOW + " has uninvited " + ChatColor.RED + target.getName(), faction);
                 target.sendMessage(ChatColor.YELLOW + "You can no longer join the faction " + ChatColor.RED + faction.getName());
             } else {
@@ -638,7 +669,7 @@ public class FactionManager {
     public void joinFaction(Player player, String name) {
 
         if(getFactionByName(name) == null) {
-            player.sendMessage(ChatColor.RED + "You are not in a faction.");
+            player.sendMessage(ChatColor.RED + "Couldn't find that faction.");
             return;
         }
 
@@ -649,7 +680,17 @@ public class FactionManager {
             return;
         }
 
-        if(!faction.getMembers().contains(player.getUniqueId().toString()) && !faction.getInvites().contains(player.getUniqueId().toString())) {
+        if(isPlayerInFaction(player)) {
+            player.sendMessage(ChatColor.RED + "You are already in a faction!");
+            return;
+        }
+
+        if(!faction.getInvites().contains(player.getUniqueId().toString())) {
+            player.sendMessage(ChatColor.RED + "You are not invited to join this faction!");
+            return;
+        }
+
+        if(!faction.getMembers().contains(player.getUniqueId().toString())) {
             if(faction.getMembers().size() < Core.getInstance().getConfig().getInt("faction-limit")) {
                 faction.getMembers().add(player.getUniqueId().toString());
                 faction.getInvites().remove(player.getUniqueId().toString());
@@ -850,26 +891,12 @@ public class FactionManager {
             player.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "--------------------------------------------------");
         } else {
 
+            int onlineCount = 0;
+
             List<String> online = new ArrayList<>();
             List<String> offline = new ArrayList<>();
             List<String> offlinecaptains = new ArrayList<>();
             List<String> onlinecaptains = new ArrayList<>();
-
-            msg = ChatColor.GOLD.toString() + ChatColor.BOLD + faction.getName() + ChatColor.GRAY + " [" + online.size() + "/" + faction.getMembers().size() + "] " + ChatColor.YELLOW + "Home: ";
-
-            if(faction.getHome() == null) {
-                msg = msg + ChatColor.RED + "Not Set" + "\n";
-            } else {
-                msg = msg + ChatColor.WHITE + faction.getHome().getBlockX() + ", " + faction.getHome().getBlockZ() + "\n";
-            }
-
-            msg = msg + ChatColor.YELLOW + "Balance: " + ChatColor.GREEN + "$" + faction.getBalance() + "\n";
-
-            if(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).isOnline()) {
-                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GREEN + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
-            } else {
-                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GRAY + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
-            }
 
             for(String str : faction.getMembers()) {
 
@@ -908,6 +935,25 @@ public class FactionManager {
 
             if(onlinecaptains.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
                 online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
+            }
+
+            onlineCount = onlineCount + onlinecaptains.size() + online.size();
+
+            msg = ChatColor.GOLD.toString() + ChatColor.BOLD + faction.getName() + ChatColor.GRAY + " [" + onlineCount + "/" + faction.getMembers().size() + "] " + ChatColor.YELLOW + "Home: ";
+
+            if(faction.getHome() == null) {
+                msg = msg + ChatColor.RED + "Not Set" + "\n";
+            } else {
+                msg = msg + ChatColor.WHITE + faction.getHome().getBlockX() + ", " + faction.getHome().getBlockZ() + "\n";
+            }
+
+            msg = msg + ChatColor.YELLOW + "Balance: " + ChatColor.GREEN + "$" + faction.getBalance() + "\n";
+
+            if(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).isOnline()) {
+                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GREEN + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
+                onlineCount++;
+            } else {
+                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GRAY + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
             }
 
             if(faction.getCaptains().size() > 0) {
@@ -956,14 +1002,14 @@ public class FactionManager {
 
     }
 
-    public void factionInfoByPlayer(Player player) {
+    public void factionInfoByPlayer(Player player, Player target) {
 
-        if(getFactionByPlayer(player) == null) {
+        if(getFactionByPlayer(target) == null) {
             player.sendMessage(ChatColor.RED + "You're not in a faction");
             return;
         }
 
-        Faction faction = getFactionByPlayer(player);
+        Faction faction = getFactionByPlayer(target);
 
         String msg;
 
@@ -981,26 +1027,13 @@ public class FactionManager {
             player.sendMessage(msg);
             player.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "--------------------------------------------------");
         } else {
+
+            int onlineCount = 0;
+
             List<String> online = new ArrayList<>();
             List<String> offline = new ArrayList<>();
             List<String> offlinecaptains = new ArrayList<>();
             List<String> onlinecaptains = new ArrayList<>();
-
-            msg = ChatColor.GOLD.toString() + ChatColor.BOLD + faction.getName() + ChatColor.GRAY + " [" + online.size() + "/" + faction.getMembers().size() + "] " + ChatColor.YELLOW + "Home: ";
-
-            if(faction.getHome() == null) {
-                msg = msg + ChatColor.RED + "Not Set" + "\n";
-            } else {
-                msg = msg + ChatColor.WHITE + faction.getHome().getBlockX() + ", " + faction.getHome().getBlockZ() + "\n";
-            }
-
-            msg = msg + ChatColor.YELLOW + "Balance: " + ChatColor.GREEN + "$" + faction.getBalance() + "\n";
-
-            if(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).isOnline()) {
-                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GREEN + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
-            } else {
-                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GRAY + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
-            }
 
             for(String str : faction.getMembers()) {
 
@@ -1039,6 +1072,24 @@ public class FactionManager {
 
             if(onlinecaptains.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
                 online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
+            }
+
+            onlineCount = onlineCount + onlinecaptains.size() + online.size();
+
+            msg = ChatColor.GOLD.toString() + ChatColor.BOLD + faction.getName() + ChatColor.GRAY + " [" + online.size() + "/" + faction.getMembers().size() + "] " + ChatColor.YELLOW + "Home: ";
+
+            if(faction.getHome() == null) {
+                msg = msg + ChatColor.RED + "Not Set" + "\n";
+            } else {
+                msg = msg + ChatColor.WHITE + faction.getHome().getBlockX() + ", " + faction.getHome().getBlockZ() + "\n";
+            }
+
+            msg = msg + ChatColor.YELLOW + "Balance: " + ChatColor.GREEN + "$" + faction.getBalance() + "\n";
+
+            if(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).isOnline()) {
+                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GREEN + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
+            } else {
+                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GRAY + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
             }
 
             if(faction.getCaptains().size() > 0) {

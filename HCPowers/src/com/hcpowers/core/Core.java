@@ -71,7 +71,6 @@ public class Core extends JavaPlugin {
             System.out.println("[Factions] Created the directory 'Factions' with no errors!");
         }
 
-
         file = new File(this.getDataFolder(), "factions.yml");
 
         if (!file.exists()) {
@@ -105,6 +104,8 @@ public class Core extends JavaPlugin {
         Bukkit.getServer().getPluginManager().registerEvents(new BreakBlocksInClaim(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new PlaceBlocksInClaim(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerDeath(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new PlayerDamage(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new FactionChat(), this);
     }
 
     public static Core getInstance() {

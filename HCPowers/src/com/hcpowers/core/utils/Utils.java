@@ -1,5 +1,8 @@
 package com.hcpowers.core.utils;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import java.text.DecimalFormat;
 
 public class Utils {
@@ -26,6 +29,16 @@ public class Utils {
         DecimalFormat f = new DecimalFormat("#0.00");
 
         return f.format(db);
+    }
+
+    public void sendMessage(String msg) {
+
+        for(Player p : Bukkit.getServer().getOnlinePlayers()) {
+            //Add check when profiles are added for players who muted chat
+
+            p.sendMessage(msg);
+        }
+
     }
 
 }
