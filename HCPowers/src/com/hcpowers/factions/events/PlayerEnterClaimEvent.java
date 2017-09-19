@@ -18,7 +18,7 @@ public class PlayerEnterClaimEvent implements Listener {
         Player player = event.getPlayer();
 
         if(!FactionManager.getManager().insideClaim(event.getFrom()) && FactionManager.getManager().insideClaim(event.getTo())) {
-            Bukkit.getServer().getPluginManager().callEvent(new PlayerEnterClaim(player, FactionManager.getManager().getClaimByLocation(event.getTo())));
+            Bukkit.getServer().getPluginManager().callEvent(new PlayerEnterClaim(player, FactionManager.getManager().getFactionByLocation(event.getTo())));
         }
 
     }

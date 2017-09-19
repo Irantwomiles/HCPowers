@@ -1,15 +1,24 @@
 package com.hcpowers.core;
 
+import com.hcpowers.factions.Claim;
+import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
 import com.hcpowers.factions.commands.FactionCommands;
 import com.hcpowers.factions.events.*;
+import com.hcpowers.factions.runnables.ClaimRunnable;
 import com.hcpowers.factions.runnables.FactionRunnable;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 
 public class Core extends JavaPlugin {
 
@@ -18,6 +27,7 @@ public class Core extends JavaPlugin {
     private static Core instance;
 
     private FactionRunnable factionRunnable = new FactionRunnable();
+    private ClaimRunnable claimRunnable = new ClaimRunnable();
 
     public void onEnable() {
 
@@ -31,6 +41,7 @@ public class Core extends JavaPlugin {
         registerEvents();
 
         factionRunnable.runTaskTimer(this, 20, 20);
+        claimRunnable.runTaskTimer(this, 20, 20);
 
     }
 

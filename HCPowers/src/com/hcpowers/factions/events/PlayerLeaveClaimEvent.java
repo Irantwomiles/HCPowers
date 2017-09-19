@@ -18,7 +18,7 @@ public class PlayerLeaveClaimEvent implements Listener {
         Player player = event.getPlayer();
 
         if(FactionManager.getManager().insideClaim(event.getFrom()) && !FactionManager.getManager().insideClaim(event.getTo())) {
-            Bukkit.getServer().getPluginManager().callEvent(new PlayerLeaveClaim(player, FactionManager.getManager().getClaimByLocation(event.getFrom())));
+            Bukkit.getServer().getPluginManager().callEvent(new PlayerLeaveClaim(player, FactionManager.getManager().getFactionByLocation(event.getFrom())));
         }
 
     }

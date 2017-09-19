@@ -2,10 +2,13 @@ package com.hcpowers.factions;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Faction {
 
@@ -78,6 +81,7 @@ public class Faction {
         deathban = true;
 
         dtr = 1.01;
+        maxDtr = 1.01;
 
         balance = 100000;
 
@@ -94,5 +98,20 @@ public class Faction {
 
         return false;
     }
+
+    public int onlinePlayerCount() {
+        int count = 0;
+
+        for(String uuid : members) {
+
+            OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
+
+            if(player.isOnline()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
 
 }

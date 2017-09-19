@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="HCPowers:jar">
+    <output-path>$USER_HOME$/Desktop/MC Stuff/BungeeCord/ServerA/plugins</output-path>
+    <root id="archive" name="HCPowers.jar">
+      <element id="module-output" name="HCPowers" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/MC Stuff/BungeeCord/Dep/sportkb_kohi.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
