@@ -1,12 +1,17 @@
 package com.hcpowers.factions.events;
 
 import com.hcpowers.core.Core;
+import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
 import com.hcpowers.factions.walls.ClaimWall;
 import com.hcpowers.profile.PlayerProfile;
 import com.hcpowers.profile.ProfileManager;
+import net.minecraft.server.v1_7_R4.PacketPlayOutWorldParticles;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,10 +32,26 @@ public class PlayerMove implements Listener {
 
         if(event.getFrom() != event.getTo()) {
 
-            if((FactionManager.getManager().getFactionByLocation(event.getTo()) != null) && playerDamage.getPvptimer().containsKey(player.getName())) {
+            if((FactionManager.getManager().getFactionByLocation(event.getTo()) != null)) {
 
-                player.teleport(player.getLocation().add(event.getFrom().toVector().subtract(event.getTo().toVector()).normalize().multiply(2)));
+                Faction faction = FactionManager.getManager().getFactionByLocation(event.getTo());
 
+                if(faction.isSystem() && faction.isDeathban() && profile.getPvpprot() > 0) {
+
+                    player.teleport(player.getLocation().add(event.getFrom().toVector().subtract(event.getTo().toVector()).normalize().multiply(2)));
+                    player.playSound(player.getLocation(), Sound.FIRE_IGNITE, 10F, 10F);
+
+                } else if(faction.isSystem() && !faction.isDeathban() && profile.getPvptimer() > 0) {
+
+                    player.teleport(player.getLocation().add(event.getFrom().toVector().subtract(event.getTo().toVector()).normalize().multiply(2)));
+                    player.playSound(player.getLocation(), Sound.FIRE_IGNITE, 10F, 10F);
+
+                } else if(!faction.isSystem() && faction.isDeathban() && profile.getPvpprot() > 0) {
+
+                    player.teleport(player.getLocation().add(event.getFrom().toVector().subtract(event.getTo().toVector()).normalize().multiply(2)));
+                    player.playSound(player.getLocation(), Sound.FIRE_IGNITE, 10F, 10F);
+
+                }
             }
         }
 

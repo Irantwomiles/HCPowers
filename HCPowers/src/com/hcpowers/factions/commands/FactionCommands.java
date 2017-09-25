@@ -155,12 +155,12 @@ public class FactionCommands implements CommandExecutor {
            if(args[0].equalsIgnoreCase("map")) {
 
                if(!map.containsKey(player.getName())) {
-                   map.put(player.getName(), new ArrayList<Faction>());
 
                    Location loc1 = new Location(Bukkit.getWorld(Core.getInstance().getConfig().getString("faction-world")), player.getLocation().getBlockX() + 50, 0, player.getLocation().getBlockZ() + 50);
                    Location loc2 = new Location(Bukkit.getWorld(Core.getInstance().getConfig().getString("faction-world")), player.getLocation().getBlockX() - 50, 0, player.getLocation().getBlockZ() - 50);
 
-                   fmap.factionMap(player, loc1, loc2);
+                   map.put(player.getName(), fmap.factionMap(player, loc1, loc2));
+
                    player.sendMessage(ChatColor.YELLOW + "Looking for near by factions");
 
                    String msg = ChatColor.YELLOW + "Found: " + ChatColor.AQUA;
@@ -177,7 +177,6 @@ public class FactionCommands implements CommandExecutor {
                    getMap().remove(player.getName());
 
                }
-
            }
 
            if(args[0].equalsIgnoreCase("who") || args[0].equalsIgnoreCase("show")) {

@@ -14,9 +14,10 @@ import java.util.ArrayList;
 
 public class FactionMap {
 
-    public void factionMap(Player player, Location loc1, Location loc2) {
+    public ArrayList<Faction> factionMap(Player player, Location loc1, Location loc2) {
 
         ArrayList<Location> locations = new ArrayList<>();
+        ArrayList<Faction> factions = new ArrayList<>();
 
         int locMax_x = Math.max(loc1.getBlockX(), loc2.getBlockX());
         int locMin_x = Math.min(loc1.getBlockX(), loc2.getBlockX());
@@ -40,7 +41,7 @@ public class FactionMap {
 
                 Faction faction = FactionManager.getManager().getFactionByLocation(loc);
 
-                FactionCommands.getMap().get(player.getName()).add(faction);
+                factions.add(faction);
 
                 int facMax_x = Math.max(faction.getLoc1().getBlockX(), faction.getLoc2().getBlockX());
                 int facMin_x = Math.min(faction.getLoc1().getBlockX(), faction.getLoc2().getBlockX());
@@ -60,6 +61,8 @@ public class FactionMap {
                 }
             }
         }
+
+        return factions;
     }
 
     public void hidePillars(Player player) {

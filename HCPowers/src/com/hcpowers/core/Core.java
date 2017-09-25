@@ -7,6 +7,7 @@ import com.hcpowers.factions.commands.FactionCommands;
 import com.hcpowers.factions.events.*;
 import com.hcpowers.factions.runnables.ClaimRunnable;
 import com.hcpowers.factions.runnables.FactionRunnable;
+import com.hcpowers.factions.runnables.PlayerRunnables;
 import com.hcpowers.factions.walls.ClaimWall;
 import com.hcpowers.profile.ProfileManager;
 import com.hcpowers.profile.SetupProfile;
@@ -31,8 +32,8 @@ public class Core extends JavaPlugin {
 
     private FactionRunnable factionRunnable = new FactionRunnable();
     private ClaimRunnable claimRunnable = new ClaimRunnable();
+    private PlayerRunnables playerRunnables = new PlayerRunnables();
 
-    private ClaimWall wall = new ClaimWall();
     private ProfileManager pm = new ProfileManager();
 
     public void onEnable() {
@@ -48,14 +49,16 @@ public class Core extends JavaPlugin {
 
         factionRunnable.runTaskTimer(this, 20, 20);
         claimRunnable.runTaskTimer(this, 5, 5);
-
-        wall.getWall().put("Irantwomiles", new ArrayList<Faction>());
+        playerRunnables.runTaskTimer(this, 20, 20);
 
         pm.createFolder();
 
         for(Player player : Bukkit.getServer().getOnlinePlayers()) {
             pm.loadProfile(player);
         }
+
+        getConfig().options().copyDefaults(true);
+        saveConfig();
 
     }
 

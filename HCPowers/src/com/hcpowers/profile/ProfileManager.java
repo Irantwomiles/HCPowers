@@ -1,11 +1,15 @@
 package com.hcpowers.profile;
 
 import com.hcpowers.core.Core;
+import com.hcpowers.factions.Faction;
+import com.hcpowers.factions.commands.FactionCommands;
+import com.hcpowers.factions.walls.ClaimWall;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,6 +47,10 @@ public class ProfileManager {
             profile.setPlayer(player);
 
             profiles.add(profile);
+
+            if(profile.getPvpprot() > 0) {
+                ClaimWall.getWall().put(player.getName(), new ArrayList<Faction>());
+            }
 
         } else {
             createPlayerFile(player);

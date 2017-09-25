@@ -2,6 +2,8 @@ package com.hcpowers.factions.events;
 
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
+import com.hcpowers.profile.PlayerProfile;
+import com.hcpowers.profile.ProfileManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,7 +14,7 @@ import java.util.HashMap;
 
 public class PlayerDamage implements Listener {
 
-    private static HashMap<String, Integer> pvptimer = new HashMap<>();
+    private ProfileManager pm = new ProfileManager();
 
     @EventHandler
     public void onHit(EntityDamageByEntityEvent event) {
@@ -21,6 +23,21 @@ public class PlayerDamage implements Listener {
 
             Player hit = (Player) event.getEntity();
             Player damager = (Player) event.getDamager();
+
+            PlayerProfile damagerProfile = pm.getProfileByPlayer(damager);
+            PlayerProfile hitProfile = pm.getProfileByPlayer(hit);
+
+            if(hitProfile.getPvpprot() > 0) {
+                damager.sendMessage(ChatColor.RED + "That player still has PvP-Protection");
+                event.setCancelled(true);
+                return;
+            }
+
+            if(damagerProfile.getPvpprot() > 0) {
+                damager.sendMessage(ChatColor.RED + "You still have PvP-Protection! /pvpenable");
+                event.setCancelled(true);
+                return;
+            }
 
             if(FactionManager.getManager().getFactionByLocation(hit.getLocation()) != null) {
 
@@ -55,17 +72,13 @@ public class PlayerDamage implements Listener {
                     damager.sendMessage(ChatColor.YELLOW + "Can't damage " + ChatColor.DARK_GREEN + hit.getName() + ChatColor.YELLOW + ", because you are in the same faction!");
                     event.setCancelled(true);
                 } else {
-                    getPvptimer().put(damager.getName(), 60);
-                    getPvptimer().put(hit.getName(), 10);
+                    damagerProfile.setPvptimer(60);
+                    hitProfile.setPvptimer(10);
                 }
             } else {
-                getPvptimer().put(damager.getName(), 60);
-                getPvptimer().put(hit.getName(), 10);
+                damagerProfile.setPvptimer(60);
+                hitProfile.setPvptimer(10);
             }
         }
-    }
-
-    public static HashMap<String, Integer> getPvptimer() {
-        return pvptimer;
     }
 }

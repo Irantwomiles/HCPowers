@@ -3,13 +3,11 @@ package com.hcpowers.factions.walls;
 import com.hcpowers.core.Core;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
-import com.hcpowers.factions.commands.FactionCommands;
 import com.hcpowers.profile.PlayerProfile;
 import com.hcpowers.profile.ProfileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -19,13 +17,20 @@ public class ClaimWall {
 
     private static HashMap<String, ArrayList<Faction>> wall = new HashMap<>();
 
+    private FactionMap fmap = new FactionMap();
+
     private ProfileManager pm = new ProfileManager();
 
     public void hideWall(Player player) {
 
-        if(FactionCommands.getMap().get(player.getName()).size() > 0) {
+        Location loc1 = new Location(Bukkit.getWorld(Core.getInstance().getConfig().getString("faction-world")), player.getLocation().getBlockX() + 50, 0, player.getLocation().getBlockZ() + 50);
+        Location loc2 = new Location(Bukkit.getWorld(Core.getInstance().getConfig().getString("faction-world")), player.getLocation().getBlockX() - 50, 0, player.getLocation().getBlockZ() - 50);
 
-            for(Faction faction : FactionCommands.getMap().get(player.getName())) {
+        ArrayList<Faction> factions = fmap.factionMap(player, loc1, loc2);
+
+        if(factions.size() > 0) {
+
+            for(Faction faction : factions) {
 
                 if(faction.getLoc1() != null && faction.getLoc2() != null) {
                     int maxx = Math.max(faction.getLoc1().getBlockX(), faction.getLoc2().getBlockX());
