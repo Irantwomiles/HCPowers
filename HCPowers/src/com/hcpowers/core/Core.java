@@ -7,6 +7,8 @@ import com.hcpowers.factions.commands.FactionCommands;
 import com.hcpowers.factions.events.*;
 import com.hcpowers.factions.runnables.ClaimRunnable;
 import com.hcpowers.factions.runnables.FactionRunnable;
+import com.hcpowers.factions.walls.ClaimWall;
+import com.hcpowers.profile.ProfileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,11 +31,16 @@ public class Core extends JavaPlugin {
     private FactionRunnable factionRunnable = new FactionRunnable();
     private ClaimRunnable claimRunnable = new ClaimRunnable();
 
+    private ClaimWall wall = new ClaimWall();
+    private ProfileManager profileManager = new ProfileManager();
+
     public void onEnable() {
 
         instance = this;
 
         FactionManager.getManager().loadFactions();
+
+        profileManager.createFolder();
 
         setupFiles(file);
 
@@ -41,7 +48,9 @@ public class Core extends JavaPlugin {
         registerEvents();
 
         factionRunnable.runTaskTimer(this, 20, 20);
-        claimRunnable.runTaskTimer(this, 20, 20);
+        claimRunnable.runTaskTimer(this, 5, 5);
+
+        wall.getWall().put("Irantwomiles", new ArrayList<Faction>());
 
     }
 
@@ -55,8 +64,8 @@ public class Core extends JavaPlugin {
         if (!file.exists()) {
 
             file.mkdir();
+
             file = new File(this.getDataFolder() + "/Factions", "deleteme.yml");
-            new YamlConfiguration();
 
             YamlConfiguration delete = YamlConfiguration
                     .loadConfiguration(file);
@@ -76,8 +85,6 @@ public class Core extends JavaPlugin {
         if (!file.exists()) {
 
             file = new File(this.getDataFolder(), "factions.yml");
-
-            new YamlConfiguration();
 
             YamlConfiguration config = YamlConfiguration
                     .loadConfiguration(file);
@@ -106,6 +113,7 @@ public class Core extends JavaPlugin {
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerDeath(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerDamage(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new FactionChat(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new PlayerMove(), this);
     }
 
     public static Core getInstance() {
