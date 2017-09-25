@@ -4,6 +4,7 @@ import com.hcpowers.core.Core;
 import com.hcpowers.factions.Claim;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
+import com.hcpowers.factions.walls.FactionMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -24,6 +25,8 @@ public class FactionCommands implements CommandExecutor {
     private static HashMap<String, Claim> claiming = new HashMap<>();
     private static HashMap<String, ArrayList<Faction>> map = new HashMap<>();
     private static ArrayList<String> chat = new ArrayList<>();
+
+    private FactionMap fmap = new FactionMap();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -157,7 +160,7 @@ public class FactionCommands implements CommandExecutor {
                    Location loc1 = new Location(Bukkit.getWorld(Core.getInstance().getConfig().getString("faction-world")), player.getLocation().getBlockX() + 50, 0, player.getLocation().getBlockZ() + 50);
                    Location loc2 = new Location(Bukkit.getWorld(Core.getInstance().getConfig().getString("faction-world")), player.getLocation().getBlockX() - 50, 0, player.getLocation().getBlockZ() - 50);
 
-                   FactionManager.getManager().factionMap(player, loc1, loc2);
+                   fmap.factionMap(player, loc1, loc2);
                    player.sendMessage(ChatColor.YELLOW + "Looking for near by factions");
 
                    String msg = ChatColor.YELLOW + "Found: " + ChatColor.AQUA;
@@ -170,7 +173,7 @@ public class FactionCommands implements CommandExecutor {
 
                } else {
                    player.sendMessage(ChatColor.RED + "Hiding faction pillars");
-                   FactionManager.getManager().hidePillars(player);
+                   fmap.hidePillars(player);
                    getMap().remove(player.getName());
 
                }

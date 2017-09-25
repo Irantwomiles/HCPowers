@@ -9,6 +9,7 @@ import com.hcpowers.factions.runnables.ClaimRunnable;
 import com.hcpowers.factions.runnables.FactionRunnable;
 import com.hcpowers.factions.walls.ClaimWall;
 import com.hcpowers.profile.ProfileManager;
+import com.hcpowers.profile.SetupProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,15 +33,13 @@ public class Core extends JavaPlugin {
     private ClaimRunnable claimRunnable = new ClaimRunnable();
 
     private ClaimWall wall = new ClaimWall();
-    private ProfileManager profileManager = new ProfileManager();
+    private ProfileManager pm = new ProfileManager();
 
     public void onEnable() {
 
         instance = this;
 
         FactionManager.getManager().loadFactions();
-
-        profileManager.createFolder();
 
         setupFiles(file);
 
@@ -52,10 +51,21 @@ public class Core extends JavaPlugin {
 
         wall.getWall().put("Irantwomiles", new ArrayList<Faction>());
 
+        pm.createFolder();
+
+        for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+            pm.loadProfile(player);
+        }
+
     }
 
     public void onDisable() {
         FactionManager.getManager().saveFactions();
+
+        for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+            pm.saveProfile(player);
+        }
+
     }
 
     private void setupFiles(File file) {
@@ -114,6 +124,7 @@ public class Core extends JavaPlugin {
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerDamage(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new FactionChat(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerMove(), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new SetupProfile(), this);
     }
 
     public static Core getInstance() {

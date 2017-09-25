@@ -16,7 +16,15 @@ public class PlayerProfile {
 
     @Getter
     @Setter
-    private boolean toggleMsg;
+    private boolean togglepm;
+
+    @Getter
+    @Setter
+    private int pvptimer;
+
+    @Getter
+    @Setter
+    private int pvpprot;
 
     @Getter
     @Setter

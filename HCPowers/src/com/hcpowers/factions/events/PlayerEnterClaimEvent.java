@@ -53,6 +53,7 @@ public class PlayerEnterClaimEvent implements Listener {
                 player.sendMessage(ChatColor.YELLOW + "You have entered the claim of " + ChatColor.RED + faction.getName() + ChatColor.GRAY + " (" + ChatColor.DARK_RED + "Deathban" + ChatColor.GRAY + ")");
             }
         }
+
     }
 
 }

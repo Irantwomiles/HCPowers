@@ -8,7 +8,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
+import java.util.HashMap;
+
 public class PlayerDamage implements Listener {
+
+    private static HashMap<String, Integer> pvptimer = new HashMap<>();
 
     @EventHandler
     public void onHit(EntityDamageByEntityEvent event) {
@@ -50,11 +54,18 @@ public class PlayerDamage implements Listener {
                 if(hitFaction.getName().equalsIgnoreCase(damFaction.getName())) {
                     damager.sendMessage(ChatColor.YELLOW + "Can't damage " + ChatColor.DARK_GREEN + hit.getName() + ChatColor.YELLOW + ", because you are in the same faction!");
                     event.setCancelled(true);
+                } else {
+                    getPvptimer().put(damager.getName(), 60);
+                    getPvptimer().put(hit.getName(), 10);
                 }
-
+            } else {
+                getPvptimer().put(damager.getName(), 60);
+                getPvptimer().put(hit.getName(), 10);
             }
-
         }
+    }
 
+    public static HashMap<String, Integer> getPvptimer() {
+        return pvptimer;
     }
 }

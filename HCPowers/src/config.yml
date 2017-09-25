@@ -1,2 +1,3 @@
 faction-limit: 30
 faction-world: 'world'
+enable-wall: true
