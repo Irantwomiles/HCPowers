@@ -3,14 +3,12 @@ package com.hcpowers.factions.events;
 import com.hcpowers.core.Core;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
+import com.hcpowers.factions.commands.FactionCommands;
 import com.hcpowers.factions.walls.ClaimWall;
 import com.hcpowers.profile.PlayerProfile;
 import com.hcpowers.profile.ProfileManager;
 import net.minecraft.server.v1_7_R4.PacketPlayOutWorldParticles;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -52,6 +50,15 @@ public class PlayerMove implements Listener {
                     player.playSound(player.getLocation(), Sound.FIRE_IGNITE, 10F, 10F);
 
                 }
+            }
+        }
+
+        if(FactionCommands.getHome().containsKey(player.getName())) {
+
+            if(!(event.getFrom().getBlockX() == event.getTo().getBlockX() && event.getFrom().getBlockY() == event.getTo().getBlockY() && event.getFrom().getBlockZ() == event.getTo().getBlockZ())) {
+                FactionCommands.getHome().remove(player.getName());
+
+                player.sendMessage(ChatColor.RED + "Teleportation cancelled!");
             }
         }
 

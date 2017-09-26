@@ -5,6 +5,8 @@ import com.hcpowers.factions.Claim;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
 import com.hcpowers.factions.walls.FactionMap;
+import com.hcpowers.profile.PlayerProfile;
+import com.hcpowers.profile.ProfileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -23,10 +25,12 @@ import java.util.HashMap;
 public class FactionCommands implements CommandExecutor {
 
     private static HashMap<String, Claim> claiming = new HashMap<>();
+    private static HashMap<String, Integer> home = new HashMap<>();
     private static HashMap<String, ArrayList<Faction>> map = new HashMap<>();
     private static ArrayList<String> chat = new ArrayList<>();
 
     private FactionMap fmap = new FactionMap();
+    private ProfileManager pm = new ProfileManager();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -36,6 +40,8 @@ public class FactionCommands implements CommandExecutor {
        }
 
        Player player = (Player) sender;
+
+        PlayerProfile profile = pm.getProfileByPlayer(player);
 
        if(cmd.getName().equalsIgnoreCase("faction")) {
            if(args.length < 1) {
@@ -149,6 +155,56 @@ public class FactionCommands implements CommandExecutor {
            if(args[0].equalsIgnoreCase("leave")) {
 
                FactionManager.getManager().leaveFaction(player);
+
+           }
+
+           if(args[0].equalsIgnoreCase("sethome")) {
+
+               Faction faction = FactionManager.getManager().getFactionByPlayer(player);
+
+               if(faction == null) {
+                   player.sendMessage(ChatColor.RED + "Must be in a faction to do that command");
+                   return true;
+               }
+
+               if(faction.getLeader().equalsIgnoreCase(player.getUniqueId().toString()) || faction.getCaptains().contains(player.getUniqueId().toString())) {
+                   if(FactionManager.getManager().insideClaim(player.getLocation()) && FactionManager.getManager().getFactionByLocation(player.getLocation()).getName().equalsIgnoreCase(faction.getName())) {
+
+                       faction.setHome(player.getLocation());
+
+                       FactionManager.getManager().sendFactionMessage(ChatColor.DARK_GREEN + player.getName() + ChatColor.YELLOW + " has updated the faction home!", faction);
+                   }
+               }
+
+           }
+
+           if(args[0].equalsIgnoreCase("home")) {
+
+               Faction faction = FactionManager.getManager().getFactionByPlayer(player);
+
+               if(faction == null) {
+                   player.sendMessage(ChatColor.RED + "Must be in a faction to do that command");
+                   return true;
+               }
+
+               if(faction.getHome() == null) {
+                   player.sendMessage(ChatColor.RED + "Your faction has not set a home yet!");
+                   return true;
+               }
+
+               if(profile.getPvptimer() > 0) {
+                   player.sendMessage(ChatColor.RED + "Can't do that command while combat tagged!");
+                   return true;
+               }
+
+               if(profile.getPvpprot() > 0) {
+                   player.sendMessage(ChatColor.RED + "Can't do that command while you have PvP Protection!");
+                   return true;
+               }
+
+                getHome().put(player.getName(), 10);
+
+               player.sendMessage(ChatColor.GOLD + "Teleporting home in 10 seconds");
 
            }
 
@@ -309,5 +365,6 @@ public class FactionCommands implements CommandExecutor {
     public static HashMap<String, ArrayList<Faction>> getMap() {
         return map;
     }
+    public static HashMap<String, Integer> getHome() {return home;}
     public static ArrayList<String> getChat() {return chat;}
 }
