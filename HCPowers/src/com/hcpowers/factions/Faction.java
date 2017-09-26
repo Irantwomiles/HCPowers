@@ -83,7 +83,7 @@ public class Faction {
         dtr = 1.01;
         maxDtr = 1.01;
 
-        balance = 100000;
+        balance = 0;
 
         members = new ArrayList<>();
         captains = new ArrayList<>();
