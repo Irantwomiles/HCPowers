@@ -11,6 +11,7 @@ import com.hcpowers.factions.runnables.PlayerRunnables;
 import com.hcpowers.factions.walls.ClaimWall;
 import com.hcpowers.profile.ProfileManager;
 import com.hcpowers.profile.SetupProfile;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,6 +19,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -35,6 +37,8 @@ public class Core extends JavaPlugin {
     private PlayerRunnables playerRunnables = new PlayerRunnables();
 
     private ProfileManager pm = new ProfileManager();
+
+    public static Economy economy = null;
 
     public void onEnable() {
 
@@ -55,6 +59,12 @@ public class Core extends JavaPlugin {
 
         for(Player player : Bukkit.getServer().getOnlinePlayers()) {
             pm.loadProfile(player);
+        }
+
+        if(!setupEconomy()) {
+            System.out.println("Couldn't Hook into Economy Plugin, Disabling Factions");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
         }
 
         getConfig().options().copyDefaults(true);
@@ -128,6 +138,16 @@ public class Core extends JavaPlugin {
         Bukkit.getServer().getPluginManager().registerEvents(new FactionChat(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new PlayerMove(), this);
         Bukkit.getServer().getPluginManager().registerEvents(new SetupProfile(), this);
+    }
+
+    private boolean setupEconomy() {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager()
+                .getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            economy = economyProvider.getProvider();
+        }
+
+        return (economy != null);
     }
 
     public static Core getInstance() {

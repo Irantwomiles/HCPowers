@@ -7,6 +7,7 @@ import com.hcpowers.factions.FactionManager;
 import com.hcpowers.factions.walls.FactionMap;
 import com.hcpowers.profile.PlayerProfile;
 import com.hcpowers.profile.ProfileManager;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -205,6 +206,72 @@ public class FactionCommands implements CommandExecutor {
                 getHome().put(player.getName(), 10);
 
                player.sendMessage(ChatColor.GOLD + "Teleporting home in 10 seconds");
+
+           }
+
+           if(args[0].equalsIgnoreCase("balance")) {
+
+               if(FactionManager.getManager().isPlayerInFaction(player)) {
+                   Faction faction = FactionManager.getManager().getFactionByPlayer(player);
+
+                   player.sendMessage(ChatColor.GOLD.toString() + ChatColor.BOLD + faction.getName() + ": " + ChatColor.GREEN + "$" + faction.getBalance());
+               }
+           }
+
+           if (args[0].equalsIgnoreCase("deposit") || args[0].equalsIgnoreCase("d")) {
+
+               if (args.length < 2) {
+                   player.sendMessage(ChatColor.RED + "/f deposit <amount/all>");
+                   return true;
+               }
+
+               if (FactionManager.getManager().isPlayerInFaction(player)) {
+
+                   Faction faction = FactionManager.getManager().getFactionByPlayer(player);
+
+                   int balance = (int) Core.getInstance().economy.getBalance(player);
+
+                   try {
+
+                       if (args[1].equalsIgnoreCase("all")) {
+
+                           EconomyResponse r = Core.getInstance().economy.withdrawPlayer(player, balance);
+
+                           if (r.transactionSuccess() && balance > 0) {
+
+                               faction.setBalance(faction.getBalance() + balance);
+
+                               FactionManager.getManager().sendFactionMessage(ChatColor.DARK_AQUA + player.getName() + " has deposited "
+                                       + ChatColor.GREEN + "$" + balance, faction);
+
+                           } else {
+                               player.sendMessage(ChatColor.RED + "You don't have enough money");
+                           }
+                           return true;
+                       }
+
+                       double r = Core.getInstance().economy.getBalance(player);
+
+                       int amount = Integer.parseInt(args[1]);
+
+                       if (r > amount) {
+
+                           Core.getInstance().economy.withdrawPlayer(player, amount);
+
+                           faction.setBalance(faction.getBalance() + amount);
+
+                           FactionManager.getManager().sendFactionMessage(ChatColor.DARK_AQUA + player.getName() + " has deposited "
+                                   + ChatColor.GREEN + "$" + amount, faction);
+
+                       } else {
+                           player.sendMessage(ChatColor.RED + "You don't have enough money");
+                       }
+
+                   } catch (Exception e) {
+                       player.sendMessage(ChatColor.RED + "/f deposit <amount/all>");
+                   }
+
+               }
 
            }
 
