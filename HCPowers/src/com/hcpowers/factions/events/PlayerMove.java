@@ -17,7 +17,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 public class PlayerMove implements Listener {
 
-    private PlayerDamage playerDamage = new PlayerDamage();
     private ClaimWall wall = new ClaimWall();
     private ProfileManager pm = new ProfileManager();
 
@@ -75,7 +74,5 @@ public class PlayerMove implements Listener {
                 }
             }
         }
-
     }
-
 }
