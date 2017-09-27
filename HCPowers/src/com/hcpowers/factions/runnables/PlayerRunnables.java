@@ -1,5 +1,7 @@
 package com.hcpowers.factions.runnables;
 
+import com.hcpowers.core.utils.Utils;
+import com.hcpowers.core.utils.scoreboard.PlayerBoard;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
 import com.hcpowers.factions.commands.FactionCommands;
@@ -13,8 +15,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class PlayerRunnables extends BukkitRunnable {
 
     private ProfileManager pm = new ProfileManager();
+    private PlayerBoard board = new PlayerBoard();
+    private Utils utils = new Utils();
 
     public void run() {
+
 
         for(Player player : Bukkit.getServer().getOnlinePlayers()) {
 
@@ -22,6 +27,12 @@ public class PlayerRunnables extends BukkitRunnable {
 
             if(profile.getPvptimer() > 0) {
                 profile.setPvptimer(profile.getPvptimer() - 1);
+
+                board.update(player, player.getScoreboard(), ChatColor.RED.toString() + ChatColor.BOLD + "Combat: " + ChatColor.WHITE + utils.toMMSS(profile.getPvptimer()), "pvptimer");
+
+                if(profile.getPvptimer() <= 0) {
+                    board.removeLine(player, player.getScoreboard(), "pvptimer");
+                }
             }
 
             updateProtection(player, profile);
@@ -50,8 +61,13 @@ public class PlayerRunnables extends BukkitRunnable {
             if(profile.getPvpprot() > 0) {
                 profile.setPvpprot(profile.getPvpprot() - 1);
 
-                if(profile.getPvpprot() <- 0)
+                board.update(player, player.getScoreboard(), ChatColor.BLUE.toString() + ChatColor.BOLD + "Protection: " + ChatColor.WHITE + utils.toMMSS(profile.getPvpprot()), "pvpprotection");
+
+                if(profile.getPvpprot() <= 0) {
                     profile.setPvpprot(0);
+                    board.removeLine(player, player.getScoreboard(), "pvpprotection");
+                }
+
             }
         } else {
             Faction faction = FactionManager.getManager().getFactionByLocation(player.getLocation());

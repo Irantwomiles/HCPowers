@@ -1,8 +1,10 @@
 package com.hcpowers.core;
 
+import com.hcpowers.core.utils.scoreboard.PlayerBoard;
 import com.hcpowers.factions.Claim;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
+import com.hcpowers.factions.commands.FactionAdminCommands;
 import com.hcpowers.factions.commands.FactionCommands;
 import com.hcpowers.factions.events.*;
 import com.hcpowers.factions.runnables.ClaimRunnable;
@@ -37,6 +39,7 @@ public class Core extends JavaPlugin {
     private PlayerRunnables playerRunnables = new PlayerRunnables();
 
     private ProfileManager pm = new ProfileManager();
+    private PlayerBoard pb = new PlayerBoard();
 
     public static Economy economy = null;
 
@@ -52,13 +55,14 @@ public class Core extends JavaPlugin {
         registerEvents();
 
         factionRunnable.runTaskTimer(this, 20, 20);
-        claimRunnable.runTaskTimer(this, 5, 5);
+        claimRunnable.runTaskTimer(this, 20, 20);
         playerRunnables.runTaskTimer(this, 20, 20);
 
         pm.createFolder();
 
         for(Player player : Bukkit.getServer().getOnlinePlayers()) {
             pm.loadProfile(player);
+            pb.loadEntries(player);
         }
 
         if(!setupEconomy()) {
@@ -125,6 +129,7 @@ public class Core extends JavaPlugin {
 
     private void registerCommands() {
         getCommand("faction").setExecutor(new FactionCommands());
+        getCommand("factionadmin").setExecutor(new FactionAdminCommands());
     }
 
     private void registerEvents() {

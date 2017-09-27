@@ -1,5 +1,7 @@
 package com.hcpowers.factions.events;
 
+import com.hcpowers.core.utils.Utils;
+import com.hcpowers.core.utils.scoreboard.PlayerBoard;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
 import com.hcpowers.profile.PlayerProfile;
@@ -15,6 +17,8 @@ import java.util.HashMap;
 public class PlayerDamage implements Listener {
 
     private ProfileManager pm = new ProfileManager();
+    private PlayerBoard board = new PlayerBoard();
+    private Utils utils = new Utils();
 
     @EventHandler
     public void onHit(EntityDamageByEntityEvent event) {
@@ -72,12 +76,22 @@ public class PlayerDamage implements Listener {
                     damager.sendMessage(ChatColor.YELLOW + "Can't damage " + ChatColor.DARK_GREEN + hit.getName() + ChatColor.YELLOW + ", because you are in the same faction!");
                     event.setCancelled(true);
                 } else {
+
                     damagerProfile.setPvptimer(60);
                     hitProfile.setPvptimer(10);
+
+                    board.addLine(damager, damager.getScoreboard(), ChatColor.RED.toString() + ChatColor.BOLD + "Combat: " + ChatColor.WHITE + utils.toMMSS(damagerProfile.getPvptimer()), "pvptimer");
+                    board.addLine(hit, hit.getScoreboard(), ChatColor.RED.toString() + ChatColor.BOLD + "Combat: " + ChatColor.WHITE + utils.toMMSS(hitProfile.getPvptimer()), "pvptimer");
+
                 }
             } else {
+
                 damagerProfile.setPvptimer(60);
                 hitProfile.setPvptimer(10);
+
+                board.addLine(damager, damager.getScoreboard(), ChatColor.RED.toString() + ChatColor.BOLD + "Combat: " + ChatColor.WHITE + utils.toMMSS(damagerProfile.getPvptimer()), "pvptimer");
+                board.addLine(hit, hit.getScoreboard(), ChatColor.RED.toString() + ChatColor.BOLD + "Combat: " + ChatColor.WHITE + utils.toMMSS(hitProfile.getPvptimer()), "pvptimer");
+
             }
         }
     }

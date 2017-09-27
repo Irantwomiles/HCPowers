@@ -5,7 +5,8 @@ description: Just desting
 version: 1.0
 commands:
   faction:
-    description: create a faction
+    description: faction commands
     aliases: [f, t, team]
-  testtime:
-    description: testing
+  factionadmin:
+    description: faction admin commands
+    aliases: [fa]

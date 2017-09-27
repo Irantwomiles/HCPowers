@@ -1,6 +1,7 @@
 package com.hcpowers.factions.commands;
 
 import com.hcpowers.core.Core;
+import com.hcpowers.core.utils.scoreboard.PlayerBoard;
 import com.hcpowers.factions.Claim;
 import com.hcpowers.factions.Faction;
 import com.hcpowers.factions.FactionManager;
@@ -32,6 +33,7 @@ public class FactionCommands implements CommandExecutor {
 
     private FactionMap fmap = new FactionMap();
     private ProfileManager pm = new ProfileManager();
+    private PlayerBoard board = new PlayerBoard();
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -86,6 +88,18 @@ public class FactionCommands implements CommandExecutor {
                }
 
                FactionManager.getManager().createFaction(args[1], player);
+
+           }
+
+           if(args[0].equalsIgnoreCase("add")) {
+
+               board.addLine(player, player.getScoreboard(), args[1], args[2]);
+
+           }
+
+           if(args[0].equalsIgnoreCase("update")) {
+
+               board.update(player, player.getScoreboard(), args[1], args[2]);
 
            }
 
@@ -229,7 +243,7 @@ public class FactionCommands implements CommandExecutor {
 
                    Faction faction = FactionManager.getManager().getFactionByPlayer(player);
 
-                   int balance = (int) Core.getInstance().economy.getBalance(player);
+                   int balance = (int) Core.economy.getBalance(player);
 
                    try {
 
@@ -250,7 +264,7 @@ public class FactionCommands implements CommandExecutor {
                            return true;
                        }
 
-                       double r = Core.getInstance().economy.getBalance(player);
+                       double r = Core.economy.getBalance(player);
 
                        int amount = Integer.parseInt(args[1]);
 
