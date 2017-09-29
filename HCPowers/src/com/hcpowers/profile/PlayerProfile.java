@@ -12,6 +12,10 @@ public class PlayerProfile {
 
     @Getter
     @Setter
+    private long deathban;
+
+    @Getter
+    @Setter
     private boolean toggleChat;
 
     @Getter
