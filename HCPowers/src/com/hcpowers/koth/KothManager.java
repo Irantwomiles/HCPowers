@@ -1,6 +1,7 @@
 package com.hcpowers.koth;
 
 import com.hcpowers.core.Core;
+import com.hcpowers.factions.Faction;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -57,7 +58,7 @@ public class KothManager {
                     int y = config.getInt("koth." + name + ".loc1.y");
                     int z = config.getInt("koth." + name + ".loc1.z");
 
-                    String world = config.getString("koth." + name + "loc1.world");
+                    String world = config.getString("koth." + name + ".loc1.world");
 
                     Location location = new Location(Bukkit.getWorld(world), x, y, z);
 
@@ -71,7 +72,7 @@ public class KothManager {
                     int y = config.getInt("koth." + name + ".loc2.y");
                     int z = config.getInt("koth." + name + ".loc2.z");
 
-                    String world = config.getString("koth." + name + "loc2.world");
+                    String world = config.getString("koth." + name + ".loc2.world");
 
                     Location location = new Location(Bukkit.getWorld(world), x, y, z);
 
@@ -79,15 +80,32 @@ public class KothManager {
 
                 }
 
-                List<?> items = config.getList("koth." + name + ".loot");
+                if(config.contains("koth." + name + ".lootloc")) {
 
-                ItemStack[] loot = new ItemStack[items.size()];
+                    int x = config.getInt("koth." + name + ".lootloc.x");
+                    int y = config.getInt("koth." + name + ".lootloc.y");
+                    int z = config.getInt("koth." + name + ".lootloc.z");
 
-                for(int i = 0; i < items.size(); i++) {
-                    loot[i] = (ItemStack) items.get(i);
+                    String world = config.getString("koth." + name + ".lootloc.world");
+
+                    Location location = new Location(Bukkit.getWorld(world), x, y, z);
+
+                    koth.setLootLoc(location);
+
                 }
 
-                koth.setLoot(loot);
+                if(config.contains("koth." + name + ".loot")) {
+
+                    List<?> items = config.getList("koth." + name + ".loot");
+
+                    ItemStack[] loot = new ItemStack[items.size()];
+
+                    for(int i = 0; i < items.size(); i++) {
+                        loot[i] = (ItemStack) items.get(i);
+                    }
+
+                    koth.setLoot(loot);
+                }
 
                 koths.add(koth);
 
@@ -112,6 +130,19 @@ public class KothManager {
                 config.set("koth." + name + ".loot", koth.getLoot());
                 config.set("koth." + name + ".timer", koth.getTimer());
                 config.set("koth." + name + ".active", koth.isActive());
+
+                if(koth.getLoot() != null) {
+                    if(config.contains("koth." + name + ".loot")) {
+                        config.set("koth." + name + ".loot", koth.getLoot());
+                    } else {
+                        config.createSection("koth." + name + ".loot");
+                        config.set("koth." + name + ".loot", koth.getLoot());
+                    }
+                } else {
+                    if(config.contains("koth." + name + ".loot")) {
+                        config.set("koth." + name + ".loot", null);
+                    }
+                }
 
                 if(koth.getLoc1() != null) {
 
@@ -161,6 +192,30 @@ public class KothManager {
                     }
                 }
 
+                if(koth.getLootLoc() != null) {
+
+                    if(config.contains("koth." + name + ".lootloc")) {
+                        config.set("koth." + name + ".lootloc.x", koth.getLootLoc().getBlockX());
+                        config.set("koth." + name + ".lootloc.y", koth.getLootLoc().getBlockY());
+                        config.set("koth." + name + ".lootloc.z", koth.getLootLoc().getBlockZ());
+                        config.set("koth." + name + ".lootloc.world", koth.getLootLoc().getWorld().getName());
+                    } else {
+                        config.createSection("koth." + name + ".lootloc.x");
+                        config.createSection("koth." + name + ".lootloc.y");
+                        config.createSection("koth." + name + ".lootloc.z");
+                        config.createSection("koth." + name + ".lootloc.world");
+
+                        config.set("koth." + name + ".lootloc.x", koth.getLootLoc().getBlockX());
+                        config.set("koth." + name + ".lootloc.y", koth.getLootLoc().getBlockY());
+                        config.set("koth." + name + ".lootloc.z", koth.getLootLoc().getBlockZ());
+                        config.set("koth." + name + ".lootloc.world", koth.getLootLoc().getWorld().getName());
+                    }
+                } else {
+                    if(config.contains("koth." + name + ".lootloc")) {
+                        config.set("koth." + name + ".lootloc", null);
+                    }
+                }
+
                 try {
                     config.save(file);
                 } catch (IOException e) {
@@ -181,11 +236,27 @@ public class KothManager {
 
                 config.createSection("koth." + name + ".timer");
                 config.createSection("koth." + name + ".active");
-                config.createSection("koth." + name + ".loot");
+
 
                 config.set("koth." + name + ".timer", koth.getTimer());
                 config.set("koth." + name + ".active", koth.isActive());
-                config.set("koth." + name + ".loot", koth.getLoot());
+
+
+                if(koth.getLoot() != null) {
+                    config.createSection("koth." + name + ".loot");
+
+                    ArrayList<ItemStack> list = new ArrayList<>();
+
+                    for(int i = 0; i < koth.getLoot().length; i++) {
+
+                        if(koth.getLoot()[i] != null) {
+                            list.add(koth.getLoot()[i]);
+                        }
+
+                    }
+
+                    config.set("koth." + name + ".loot", list);
+                }
 
                 if(koth.getLoc1() != null) {
                     config.createSection("koth." + name + ".loc1.x");
@@ -210,6 +281,19 @@ public class KothManager {
                     config.set("koth." + name + ".loc2.y", koth.getLoc2().getBlockY());
                     config.set("koth." + name + ".loc2.z", koth.getLoc2().getBlockZ());
                     config.set("koth." + name + ".loc2.world", koth.getLoc2().getWorld().getName());
+                }
+
+                if (koth.getLootLoc() != null) {
+
+                    config.createSection("koth." + name + ".lootloc.x");
+                    config.createSection("koth." + name + ".lootloc.y");
+                    config.createSection("koth." + name + ".lootloc.z");
+                    config.createSection("koth." + name + ".lootloc.world");
+
+                    config.set("koth." + name + ".lootloc.x", koth.getLootLoc().getBlockX());
+                    config.set("koth." + name + ".lootloc.y", koth.getLootLoc().getBlockY());
+                    config.set("koth." + name + ".lootloc.z", koth.getLootLoc().getBlockZ());
+                    config.set("koth." + name + ".lootloc.world", koth.getLootLoc().getWorld().getName());
                 }
 
                 try {
@@ -244,5 +328,70 @@ public class KothManager {
         }
 
         return null;
+    }
+
+    public boolean insideCapzone(Location loc) {
+        for(Koth koth : koths) {
+
+            if(koth.getLoc1() != null && koth.getLoc2() != null) {
+                Location loc1 = koth.getLoc1();
+                Location loc2 = koth.getLoc2();
+
+                int xMax = Math.max(loc1.getBlockX(), loc2.getBlockX());
+                int zMax = Math.max(loc1.getBlockZ(), loc2.getBlockZ());
+                int yMax = Math.max(loc1.getBlockY(), loc2.getBlockY());
+
+                int xMin = Math.min(loc1.getBlockX(), loc2.getBlockX());
+                int zMin = Math.min(loc1.getBlockZ(), loc2.getBlockZ());
+                int yMin = Math.min(loc1.getBlockY(), loc2.getBlockY());
+
+                if ((loc.getBlockX() >= xMin) && (loc.getBlockX() <= xMax)) {
+                    if ((loc.getBlockZ() >= zMin) && (loc.getBlockZ() <= zMax)) {
+                        if ((loc.getBlockY() >= yMin) && (loc.getBlockY() <= yMax)) {
+                            if(loc.getWorld().getName().equals(loc1.getWorld().getName())) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public Koth getKothByLocation(Location loc) {
+        for(Koth koth : koths) {
+
+            if(koth.getLoc1() != null && koth.getLoc2() != null) {
+                Location loc1 = koth.getLoc1();
+                Location loc2 = koth.getLoc2();
+
+
+                int xMax = Math.max(loc1.getBlockX(), loc2.getBlockX());
+                int zMax = Math.max(loc1.getBlockZ(), loc2.getBlockZ());
+                int yMax = Math.max(loc1.getBlockY(), loc2.getBlockY());
+
+                int xMin = Math.min(loc1.getBlockX(), loc2.getBlockX());
+                int zMin = Math.min(loc1.getBlockZ(), loc2.getBlockZ());
+                int yMin = Math.min(loc1.getBlockY(), loc2.getBlockY());
+
+                if ((loc.getBlockX() >= xMin) && (loc.getBlockX() <= xMax)) {
+                    if ((loc.getBlockZ() >= zMin) && (loc.getBlockZ() <= zMax)) {
+                        if ((loc.getBlockY() >= yMin) && (loc.getBlockY() <= yMax)) {
+                            if(loc.getWorld().getName().equals(loc1.getWorld().getName())) {
+                                return koth;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static ArrayList<Koth> getKoths() {
+        return koths;
     }
 }

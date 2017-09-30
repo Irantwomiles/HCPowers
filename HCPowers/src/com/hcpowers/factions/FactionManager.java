@@ -132,14 +132,17 @@ public class FactionManager {
                         String motd = fac.getString("factions." + f + ".motd");
 
                         if(fac.contains("factions." + f + ".loc1") && fac.contains("factions." + f + ".loc2")) {
+
                             int x1 = fac.getInt("factions." + f + ".loc1.x");
                             int z1 = fac.getInt("factions." + f + ".loc1.z");
 
                             int x2 = fac.getInt("factions." + f + ".loc2.x");
                             int z2 = fac.getInt("factions." + f + ".loc2.z");
 
-                            Location loc1 = new Location(Bukkit.getWorld("world"), x1, 0, z1);
-                            Location loc2 = new Location(Bukkit.getWorld("world"), x2, 0, z2);
+                            String world = fac.getString("factions." + f + ".loc1.world");
+
+                            Location loc1 = new Location(Bukkit.getWorld(world), x1, 0, z1);
+                            Location loc2 = new Location(Bukkit.getWorld(world), x2, 0, z2);
 
                             faction.setLoc1(loc1);
                             faction.setLoc2(loc2);
@@ -153,7 +156,9 @@ public class FactionManager {
                             float pitch = fac.getFloat("factions." + f + ".home.pitch");
                             float yaw = fac.getFloat("factions." + f + ".home.yaw");
 
-                            Location home = new Location(Bukkit.getWorld("world"), x, y, z);
+                            String world = fac.getString("factions." + f + ".home.world");
+
+                            Location home = new Location(Bukkit.getWorld(world), x, y, z);
 
                             home.setPitch(pitch);
                             home.setYaw(yaw);
@@ -176,13 +181,37 @@ public class FactionManager {
 
     }
 
+    //TODO: Remove actual faction file from Factions folder
+
+    public void removeFile(List<String> s) {
+
+        file = new File(Core.getInstance().getDataFolder() + "/Factions");
+
+        if(file.isDirectory() && file.listFiles().length > 0) {
+
+            for(File file : file.listFiles()) {
+
+                if(!s.contains(file.getName().replace(".yml", ""))) {
+                    file.delete();
+                }
+            }
+
+        }
+
+    /*    if(file.exists()) {
+            file.delete();
+            System.out.println("Deleted file");
+        } else {
+            System.out.println("Couldn't find file " + name);
+        }*/
+
+    }
+
     public void saveFactions() {
 
         fFile = new File(Core.getInstance().getDataFolder(), "factions.yml");
 
         if (fFile.exists()) {
-
-            fFile = new File(Core.getInstance().getDataFolder(), "factions.yml");
 
             YamlConfiguration listConfig = YamlConfiguration.loadConfiguration(fFile);
 
@@ -190,10 +219,15 @@ public class FactionManager {
 
             f.clear();
 
-            for (int i = 0; i < factions.size(); i++) {
-                f.add(factions.get(i).getName());
-
+            for (Faction fac : factions) {
+                f.add(fac.getName());
             }
+
+
+            System.out.println("size: " + f.size());
+
+            removeFile(f);
+
             // set new list to config
             listConfig.set("factions", f);
 
@@ -203,236 +237,245 @@ public class FactionManager {
                 e.printStackTrace();
             }
 
-            for (String name : f) {
+            updateFactions(f);
 
-                Faction faction = getFactionByName(name);
+        }
+    }
+
+    public void updateFactions(List<String> list){
+
+        for (String name : list) {
+
+            Faction faction = getFactionByName(name);
+
+            file = new File(Core.getInstance().getDataFolder() + "/Factions", name + ".yml");
+
+            if (!file.exists()) {
 
                 file = new File(Core.getInstance().getDataFolder() + "/Factions", name + ".yml");
 
-                if (!file.exists()) {
+                YamlConfiguration facConfig = YamlConfiguration.loadConfiguration(file);
 
-                    file = new File(Core.getInstance().getDataFolder() + "/Factions", name + ".yml");
+                if(faction.isSystem()) {
 
-                    YamlConfiguration facConfig = YamlConfiguration.loadConfiguration(file);
+                    facConfig.createSection("factions." + name + ".name");
+                    facConfig.createSection("factions." + name + ".system");
+                    facConfig.createSection("factions." + name + ".deathban");
+                    facConfig.createSection("factions." + name + ".motd");
 
-                    if(faction.isSystem()) {
+                    facConfig.set("factions." + name + ".name", faction.getName());
+                    facConfig.set("factions." + name + ".system", faction.isSystem());
+                    facConfig.set("factions." + name + ".deathban", faction.isDeathban());
+                    facConfig.set("factions." + name + ".motd", faction.getMotd());
 
-                        facConfig.createSection("factions." + name + ".name");
-                        facConfig.createSection("factions." + name + ".system");
-                        facConfig.createSection("factions." + name + ".deathban");
-                        facConfig.createSection("factions." + name + ".motd");
+                    if (faction.getLoc1() != null) {
+                        facConfig.createSection("factions." + name + ".loc1.x");
+                        facConfig.createSection("factions." + name + ".loc1.z");
+                        facConfig.createSection("factions." + name + ".loc1.world");
 
-                        facConfig.set("factions." + name + ".name", faction.getName());
-                        facConfig.set("factions." + name + ".system", faction.isSystem());
-                        facConfig.set("factions." + name + ".deathban", faction.isDeathban());
-                        facConfig.set("factions." + name + ".motd", faction.getMotd());
+                        facConfig.set("factions." + name + ".loc1.x", faction.getLoc1().getBlockX());
+                        facConfig.set("factions." + name + ".loc1.z", faction.getLoc1().getBlockZ());
+                        facConfig.set("factions." + name + ".loc1.world", faction.getLoc1().getWorld().getName());
+                    }
 
-                        if (faction.getLoc1() != null) {
-                            facConfig.createSection("factions." + name + ".loc1.x");
-                            facConfig.createSection("factions." + name + ".loc1.z");
+                    if (faction.getLoc2() != null) {
+                        facConfig.createSection("factions." + name + ".loc2.x");
+                        facConfig.createSection("factions." + name + ".loc2.z");
+                        facConfig.createSection("factions." + name + ".loc2.world");
 
-                            facConfig.set("factions." + name + ".loc1.x", faction.getLoc1().getBlockX());
-                            facConfig.set("factions." + name + ".loc1.z", faction.getLoc1().getBlockZ());
-                        }
+                        facConfig.set("factions." + name + ".loc2.x", faction.getLoc2().getBlockX());
+                        facConfig.set("factions." + name + ".loc2.z", faction.getLoc2().getBlockZ());
+                        facConfig.set("factions." + name + ".loc2.world", faction.getLoc2().getWorld().getName());
+                    }
 
-                        if (faction.getLoc2() != null) {
-                            facConfig.createSection("factions." + name + ".loc2.x");
-                            facConfig.createSection("factions." + name + ".loc2.z");
+                    if (faction.getHome() != null) {
+                        facConfig.createSection("factions." + name + ".home.x");
+                        facConfig.createSection("factions." + name + ".home.y");
+                        facConfig.createSection("factions." + name + ".home.z");
+                        facConfig.createSection("factions." + name + ".home.pitch");
+                        facConfig.createSection("factions." + name + ".home.yaw");
+                        facConfig.createSection("factions." + name + ".world");
 
-                            facConfig.set("factions." + name + ".loc2.x", faction.getLoc2().getBlockX());
-                            facConfig.set("factions." + name + ".loc2.z", faction.getLoc2().getBlockZ());
-                        }
+                        facConfig.set("factions." + name + ".home.x", faction.getHome().getBlockX());
+                        facConfig.set("factions." + name + ".home.y", faction.getHome().getBlockY());
+                        facConfig.set("factions." + name + ".home.z", faction.getHome().getBlockZ());
+                        facConfig.set("factions." + name + ".home.pitch", faction.getHome().getPitch());
+                        facConfig.set("factions." + name + ".home.yaw", faction.getHome().getYaw());
+                        facConfig.set("factions." + name + ".world", faction.getHome().getWorld().getName());
+                    }
 
-                        if (faction.getHome() != null) {
-                            facConfig.createSection("factions." + name + ".home.x");
-                            facConfig.createSection("factions." + name + ".home.y");
-                            facConfig.createSection("factions." + name + ".home.z");
-                            facConfig.createSection("factions." + name + ".home.pitch");
-                            facConfig.createSection("factions." + name + ".home.yaw");
-                            facConfig.createSection("factions." + name + ".world");
-
-                            facConfig.set("factions." + name + ".home.x", faction.getHome().getBlockX());
-                            facConfig.set("factions." + name + ".home.y", faction.getHome().getBlockY());
-                            facConfig.set("factions." + name + ".home.z", faction.getHome().getBlockZ());
-                            facConfig.set("factions." + name + ".home.pitch", faction.getHome().getPitch());
-                            facConfig.set("factions." + name + ".home.yaw", faction.getHome().getYaw());
-                            facConfig.set("factions." + name + ".world", faction.getHome().getWorld().getName());
-                        }
-
-                        try {
-                            facConfig.save(file);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    } else {
-                        facConfig.createSection("factions." + name + ".name");
-                        facConfig.createSection("factions." + name + ".leader");
-                        facConfig.createSection("factions." + name + ".captains"); // List
-                        facConfig.createSection("factions." + name + ".members"); // List
-                        facConfig.createSection("factions." + name + ".motd");
-
-                        facConfig.createSection("factions." + name + ".balance");
-                        facConfig.createSection("factions." + name + ".dtr");
-                        facConfig.createSection("factions." + name + ".maxdtr");
-                        facConfig.createSection("factions." + name + ".freezeTime");
-
-                        facConfig.createSection("factions." + name + ".regen");
-                        facConfig.createSection("factions." + name + ".frozen");
-
-                        facConfig.set("factions." + name + ".name", faction.getName());
-                        facConfig.set("factions." + name + ".leader", faction.getLeader());
-                        facConfig.set("factions." + name + ".motd", faction.getMotd());
-
-                        facConfig.set("factions." + name + ".captains", faction.getCaptains());
-
-                        facConfig.set("factions." + name + ".members", faction.getMembers());
-
-                        if (faction.getLoc1() != null) {
-                            facConfig.createSection("factions." + name + ".loc1.x");
-                            facConfig.createSection("factions." + name + ".loc1.z");
-
-                            facConfig.set("factions." + name + ".loc1.x", faction.getLoc1().getBlockX());
-                            facConfig.set("factions." + name + ".loc1.z", faction.getLoc1().getBlockZ());
-                        }
-
-                        if (faction.getLoc2() != null) {
-                            facConfig.createSection("factions." + name + ".loc2.x");
-                            facConfig.createSection("factions." + name + ".loc2.z");
-
-                            facConfig.set("factions." + name + ".loc2.x", faction.getLoc2().getBlockX());
-                            facConfig.set("factions." + name + ".loc2.z", faction.getLoc2().getBlockZ());
-                        }
-
-                        if (faction.getHome() != null) {
-                            facConfig.createSection("factions." + name + ".home.x");
-                            facConfig.createSection("factions." + name + ".home.y");
-                            facConfig.createSection("factions." + name + ".home.z");
-                            facConfig.createSection("factions." + name + ".home.pitch");
-                            facConfig.createSection("factions." + name + ".home.yaw");
-
-                            facConfig.set("factions." + name + ".home.x", faction.getHome().getBlockX());
-                            facConfig.set("factions." + name + ".home.y", faction.getHome().getBlockY());
-                            facConfig.set("factions." + name + ".home.z", faction.getHome().getBlockZ());
-                            facConfig.set("factions." + name + ".home.pitch", faction.getHome().getPitch());
-                            facConfig.set("factions." + name + ".home.yaw", faction.getHome().getYaw());
-
-                        }
-
-                        facConfig.set("factions." + name + ".balance", faction.getBalance());
-                        facConfig.set("factions." + name + ".dtr",
-                                faction.getDtr());
-                        facConfig.set("factions." + name + ".maxdtr",
-                                faction.getMaxDtr());
-                        facConfig.set("factions." + name + ".freezeTime", faction.getFreezetime());
-
-                        try {
-                            facConfig.save(file);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        facConfig.save(file);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
 
                 } else {
+                    facConfig.createSection("factions." + name + ".name");
+                    facConfig.createSection("factions." + name + ".leader");
+                    facConfig.createSection("factions." + name + ".captains"); // List
+                    facConfig.createSection("factions." + name + ".members"); // List
+                    facConfig.createSection("factions." + name + ".motd");
 
-                    file = new File(Core.getInstance().getDataFolder() + "/Factions", name + ".yml");
+                    facConfig.createSection("factions." + name + ".balance");
+                    facConfig.createSection("factions." + name + ".dtr");
+                    facConfig.createSection("factions." + name + ".maxdtr");
+                    facConfig.createSection("factions." + name + ".freezeTime");
 
-                    YamlConfiguration facConfig = YamlConfiguration.loadConfiguration(file);
+                    facConfig.createSection("factions." + name + ".regen");
+                    facConfig.createSection("factions." + name + ".frozen");
 
-                    if(faction.isSystem()) {
-                        //TODO: System faction stuff
+                    facConfig.set("factions." + name + ".name", faction.getName());
+                    facConfig.set("factions." + name + ".leader", faction.getLeader());
+                    facConfig.set("factions." + name + ".motd", faction.getMotd());
 
-                        facConfig.set("factions." + name + ".name", faction.getName());
-                        facConfig.set("factions." + name + ".system", faction.isSystem());
-                        facConfig.set("factions." + name + ".deathban", faction.isDeathban());
-                        facConfig.set("factions." + name + ".motd", faction.getMotd());
+                    facConfig.set("factions." + name + ".captains", faction.getCaptains());
 
-                        if (faction.getLoc1() != null) {
-                            facConfig.set("factions." + name + ".loc1.x", faction.getLoc1().getBlockX());
-                            facConfig.set("factions." + name + ".loc1.z", faction.getLoc1().getBlockZ());
-                        } else {
-                            facConfig.set("factions." + name + ".loc1", null);
-                        }
+                    facConfig.set("factions." + name + ".members", faction.getMembers());
 
-                        if (faction.getLoc2() != null) {
-                            facConfig.set("factions." + name + ".loc2.x", faction.getLoc2().getBlockX());
-                            facConfig.set("factions." + name + ".loc2.z", faction.getLoc2().getBlockZ());
-                        } else {
-                            facConfig.set("factions." + name + ".loc2", null);
-                        }
+                    if (faction.getLoc1() != null) {
+                        facConfig.createSection("factions." + name + ".loc1.x");
+                        facConfig.createSection("factions." + name + ".loc1.z");
 
-                        if (faction.getHome() != null) {
-                            facConfig.set("factions." + name + ".home.x", faction.getHome().getBlockX());
-                            facConfig.set("factions." + name + ".home.y", faction.getHome().getBlockY());
-                            facConfig.set("factions." + name + ".home.z", faction.getHome().getBlockZ());
+                        facConfig.set("factions." + name + ".loc1.x", faction.getLoc1().getBlockX());
+                        facConfig.set("factions." + name + ".loc1.z", faction.getLoc1().getBlockZ());
+                    }
 
-                            facConfig.set("factions." + name + ".home.pitch", faction.getHome().getPitch());
-                            facConfig.set("factions." + name + ".home.yaw", faction.getHome().getYaw());
+                    if (faction.getLoc2() != null) {
+                        facConfig.createSection("factions." + name + ".loc2.x");
+                        facConfig.createSection("factions." + name + ".loc2.z");
 
-                        } else {
-                            facConfig.set("factions." + name + ".home", null);
-                        }
+                        facConfig.set("factions." + name + ".loc2.x", faction.getLoc2().getBlockX());
+                        facConfig.set("factions." + name + ".loc2.z", faction.getLoc2().getBlockZ());
+                    }
 
-                        try {
-                            facConfig.save(file);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
+                    if (faction.getHome() != null) {
+                        facConfig.createSection("factions." + name + ".home.x");
+                        facConfig.createSection("factions." + name + ".home.y");
+                        facConfig.createSection("factions." + name + ".home.z");
+                        facConfig.createSection("factions." + name + ".home.pitch");
+                        facConfig.createSection("factions." + name + ".home.yaw");
 
-                        facConfig.set("factions." + name + ".name", faction.getName());
-                        facConfig.set("factions." + name + ".leader", faction.getLeader());
-                        facConfig.set("factions." + name + ".motd", faction.getMotd());
+                        facConfig.set("factions." + name + ".home.x", faction.getHome().getBlockX());
+                        facConfig.set("factions." + name + ".home.y", faction.getHome().getBlockY());
+                        facConfig.set("factions." + name + ".home.z", faction.getHome().getBlockZ());
+                        facConfig.set("factions." + name + ".home.pitch", faction.getHome().getPitch());
+                        facConfig.set("factions." + name + ".home.yaw", faction.getHome().getYaw());
 
-                        facConfig.set("factions." + name + ".captains", faction.getCaptains());
+                    }
 
-                        facConfig.set("factions." + name + ".members", faction.getMembers());
+                    facConfig.set("factions." + name + ".balance", faction.getBalance());
+                    facConfig.set("factions." + name + ".dtr",
+                            faction.getDtr());
+                    facConfig.set("factions." + name + ".maxdtr",
+                            faction.getMaxDtr());
+                    facConfig.set("factions." + name + ".freezeTime", faction.getFreezetime());
 
-
-                        if (faction.getLoc1() != null) {
-                            facConfig.set("factions." + name + ".loc1.x", faction.getLoc1().getBlockX());
-                            facConfig.set("factions." + name + ".loc1.z", faction.getLoc1().getBlockZ());
-                        } else {
-                            facConfig.set("factions." + name + ".loc1", null);
-                        }
-
-                        if (faction.getLoc2() != null) {
-                            facConfig.set("factions." + name + ".loc2.x", faction.getLoc2().getBlockX());
-                            facConfig.set("factions." + name + ".loc2.z", faction.getLoc2().getBlockZ());
-                        } else {
-                            facConfig.set("factions." + name + ".loc2", null);
-                        }
-
-                        if (faction.getHome() != null) {
-                            facConfig.set("factions." + name + ".home.x", faction.getHome().getBlockX());
-                            facConfig.set("factions." + name + ".home.y", faction.getHome().getBlockY());
-                            facConfig.set("factions." + name + ".home.z", faction.getHome().getBlockZ());
-
-                            facConfig.set("factions." + name + ".home.pitch", faction.getHome().getPitch());
-                            facConfig.set("factions." + name + ".home.yaw", faction.getHome().getYaw());
-
-                        } else {
-                            facConfig.set("factions." + name + ".home", null);
-                        }
-
-                        facConfig.set("factions." + name + ".balance", faction.getBalance());
-                        facConfig.set("factions." + name + ".dtr",
-                                faction.getDtr());
-                        facConfig.set("factions." + name + ".maxdtr",
-                                faction.getMaxDtr());
-                        facConfig.set("factions." + name + ".freezeTime", faction.getFreezetime());
-
-                        try {
-                            facConfig.save(file);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        facConfig.save(file);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
 
-                faction.getInvites().clear();
+            } else {
 
+                file = new File(Core.getInstance().getDataFolder() + "/Factions", name + ".yml");
+
+                YamlConfiguration facConfig = YamlConfiguration.loadConfiguration(file);
+
+                if(faction.isSystem()) {
+                    //TODO: System faction stuff
+
+                    facConfig.set("factions." + name + ".name", faction.getName());
+                    facConfig.set("factions." + name + ".system", faction.isSystem());
+                    facConfig.set("factions." + name + ".deathban", faction.isDeathban());
+                    facConfig.set("factions." + name + ".motd", faction.getMotd());
+
+                    if (faction.getLoc1() != null) {
+                        facConfig.set("factions." + name + ".loc1.x", faction.getLoc1().getBlockX());
+                        facConfig.set("factions." + name + ".loc1.z", faction.getLoc1().getBlockZ());
+                    } else {
+                        facConfig.set("factions." + name + ".loc1", null);
+                    }
+
+                    if (faction.getLoc2() != null) {
+                        facConfig.set("factions." + name + ".loc2.x", faction.getLoc2().getBlockX());
+                        facConfig.set("factions." + name + ".loc2.z", faction.getLoc2().getBlockZ());
+                    } else {
+                        facConfig.set("factions." + name + ".loc2", null);
+                    }
+
+                    if (faction.getHome() != null) {
+                        facConfig.set("factions." + name + ".home.x", faction.getHome().getBlockX());
+                        facConfig.set("factions." + name + ".home.y", faction.getHome().getBlockY());
+                        facConfig.set("factions." + name + ".home.z", faction.getHome().getBlockZ());
+
+                        facConfig.set("factions." + name + ".home.pitch", faction.getHome().getPitch());
+                        facConfig.set("factions." + name + ".home.yaw", faction.getHome().getYaw());
+
+                    } else {
+                        facConfig.set("factions." + name + ".home", null);
+                    }
+
+                    try {
+                        facConfig.save(file);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+
+                    facConfig.set("factions." + name + ".name", faction.getName());
+                    facConfig.set("factions." + name + ".leader", faction.getLeader());
+                    facConfig.set("factions." + name + ".motd", faction.getMotd());
+
+                    facConfig.set("factions." + name + ".captains", faction.getCaptains());
+
+                    facConfig.set("factions." + name + ".members", faction.getMembers());
+
+
+                    if (faction.getLoc1() != null) {
+                        facConfig.set("factions." + name + ".loc1.x", faction.getLoc1().getBlockX());
+                        facConfig.set("factions." + name + ".loc1.z", faction.getLoc1().getBlockZ());
+                    } else {
+                        facConfig.set("factions." + name + ".loc1", null);
+                    }
+
+                    if (faction.getLoc2() != null) {
+                        facConfig.set("factions." + name + ".loc2.x", faction.getLoc2().getBlockX());
+                        facConfig.set("factions." + name + ".loc2.z", faction.getLoc2().getBlockZ());
+                    } else {
+                        facConfig.set("factions." + name + ".loc2", null);
+                    }
+
+                    if (faction.getHome() != null) {
+                        facConfig.set("factions." + name + ".home.x", faction.getHome().getBlockX());
+                        facConfig.set("factions." + name + ".home.y", faction.getHome().getBlockY());
+                        facConfig.set("factions." + name + ".home.z", faction.getHome().getBlockZ());
+
+                        facConfig.set("factions." + name + ".home.pitch", faction.getHome().getPitch());
+                        facConfig.set("factions." + name + ".home.yaw", faction.getHome().getYaw());
+
+                    } else {
+                        facConfig.set("factions." + name + ".home", null);
+                    }
+
+                    facConfig.set("factions." + name + ".balance", faction.getBalance());
+                    facConfig.set("factions." + name + ".dtr",
+                            faction.getDtr());
+                    facConfig.set("factions." + name + ".maxdtr",
+                            faction.getMaxDtr());
+                    facConfig.set("factions." + name + ".freezeTime", faction.getFreezetime());
+
+                    try {
+                        facConfig.save(file);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
+
+            faction.getInvites().clear();
 
         }
     }
@@ -812,7 +855,9 @@ public class FactionManager {
 
                 if ((loc.getBlockX() >= xMin) && (loc.getBlockX() <= xMax)) {
                     if ((loc.getBlockZ() >= zMin) && (loc.getBlockZ() <= zMax)) {
-                        return true;
+                        if(loc.getWorld().getName().equals(loc1.getWorld().getName())) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -837,7 +882,9 @@ public class FactionManager {
 
                 if ((loc.getBlockX() >= xMin) && (loc.getBlockX() <= xMax)) {
                     if ((loc.getBlockZ() >= zMin) && (loc.getBlockZ() <= zMax)) {
-                        return faction;
+                        if(loc.getWorld().getName().equals(loc1.getWorld().getName())) {
+                            return faction;
+                        }
                     }
                 }
             }

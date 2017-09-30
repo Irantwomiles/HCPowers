@@ -77,9 +77,15 @@ public class KothClaimEvent implements Listener {
 
                     koth.setLoc1(claim.getLoc1());
                     koth.setLoc2(claim.getLoc2());
+
+                    player.setItemInHand(null);
+                    KothCommands.getClaiming().remove(player.getName());
+
                     player.sendMessage(ChatColor.DARK_AQUA.toString() + ChatColor.BOLD + "You have set the capzone for " + claim.getKoth().getName());
+
+
                 }
-                
+
             }
         }
     }
