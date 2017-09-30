@@ -938,108 +938,87 @@ public class FactionManager {
             player.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "--------------------------------------------------");
         } else {
 
-            int onlineCount = 0;
+            /*
+            --------------------------------------------------------
+           1 Name (online/offline) Home: Set/Not set
+           2 Balance: 1000
+           3 Leader: player
+           4 Captains: player, player
+           5 Members: player, player
+           6 DTR: 10.0
+           7 (option)FreezeTime: 0000
+           8 (option)[Raidable]
+           9 Announcement: This message
+            --------------------------------------------------------
 
-            List<String> online = new ArrayList<>();
-            List<String> offline = new ArrayList<>();
-            List<String> offlinecaptains = new ArrayList<>();
-            List<String> onlinecaptains = new ArrayList<>();
+             */
 
-            for(String str : faction.getMembers()) {
+            String factionName = faction.getName();
+            int online = faction.getOnlinePlayers().size();
+            int balance = faction.getBalance();
+            String leader = Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName();
 
-                OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(str));
 
-                if(p.isOnline()) {
+            //Line 1
 
-                    System.out.println(p.getName());
+            msg = ChatColor.GOLD + factionName + ChatColor.GRAY + " (" + online + "/" + faction.getMembers().size() + ") ";
 
-                    if(faction.getCaptains().contains(p.getUniqueId().toString())) {
-                        onlinecaptains.add(p.getName());
-                    } else {
-                        online.add(p.getName());
-                    }
-                } else {
-                    if(faction.getCaptains().contains(p.getUniqueId().toString())) {
-                        offlinecaptains.add(p.getName());
-                    } else {
-                        offline.add(p.getName());
-                    }
-                }
-
-            }
-
-            if(online.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
-                online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
-            }
-
-            if(offline.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
-                online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
-            }
-
-            if(offlinecaptains.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
-                online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
-            }
-
-            if(onlinecaptains.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
-                online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
-            }
-
-            onlineCount = onlineCount + onlinecaptains.size() + online.size();
-
-            msg = ChatColor.GOLD.toString() + ChatColor.BOLD + faction.getName() + ChatColor.GRAY + " [" + onlineCount + "/" + faction.getMembers().size() + "] " + ChatColor.YELLOW + "Home: ";
-
-            if(faction.getHome() == null) {
-                msg = msg + ChatColor.RED + "Not Set" + "\n";
+            if(faction.getHome() != null) {
+                msg = msg + ChatColor.GOLD + "Home: " + ChatColor.WHITE + faction.getHome().getBlockX() + ", " + faction.getHome().getBlockZ();
             } else {
-                msg = msg + ChatColor.WHITE + faction.getHome().getBlockX() + ", " + faction.getHome().getBlockZ() + "\n";
+                msg = msg + ChatColor.GOLD + "Home: " + ChatColor.RED + "Not Set\n";
             }
 
-            msg = msg + ChatColor.YELLOW + "Balance: " + ChatColor.GREEN + "$" + faction.getBalance() + "\n";
+            //Line 2
+            msg = msg + ChatColor.YELLOW + "Balance: " + ChatColor.GREEN + "$" + balance + "\n";
 
-            if(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).isOnline()) {
-                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GREEN + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
-                onlineCount++;
-            } else {
-                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GRAY + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
+            msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GRAY + leader + "\n";
+
+            String captains = "";
+
+            for(String s : faction.getCaptains()) {
+
+                OfflinePlayer pl = Bukkit.getOfflinePlayer(UUID.fromString(s));
+
+                captains = captains + ChatColor.GRAY + pl.getName() + ChatColor.WHITE + ", ";
+
+
             }
 
             if(faction.getCaptains().size() > 0) {
-                String cap = "";
+                msg = msg + ChatColor.YELLOW + "Captains: " + captains.substring(0, captains.length() - 2) + "\n";
+            }
 
-                for(String s : onlinecaptains) {
-                    cap = ChatColor.GREEN + cap + "," + s;
+            String members = "";
+
+            for(String s : faction.getMembers()) {
+
+                OfflinePlayer pl = Bukkit.getOfflinePlayer(UUID.fromString(s));
+
+                if(pl.isOnline()) {
+                    members = members + ChatColor.GREEN + pl.getName() + ChatColor.WHITE + ", ";
+                } else {
+                    members = members + ChatColor.GRAY + pl.getName() + ChatColor.WHITE + ", ";
                 }
-
-                for(String s : offlinecaptains) {
-                    cap = ChatColor.GRAY + cap + "," + s;
-                }
-
-                msg = msg + ChatColor.YELLOW + "Captains: " + cap + "\n";
             }
 
-            String memb = "";
+            msg = msg + ChatColor.YELLOW + "Members: " + members.substring(0, members.length() - 2) + "\n";
 
-            for(String s : online) {
-                memb = ChatColor.GREEN + memb + "," + s;
-            }
-
-            for(String s : offline) {
-                memb = ChatColor.GRAY + memb + "," + s;
-            }
-
-
-             msg = msg + ChatColor.YELLOW + "Members: " + memb + "\n";
-
-            if (faction.isRaidable()) {
-                msg = msg + ChatColor.YELLOW + "DTR: " + ChatColor.RED + utils.formatDouble(faction.getDtr()) + "\n"
-                        + ChatColor.RED.toString() + ChatColor.BOLD + "[RAIDABLE]" + "\n";
-            } else {
+            if(faction.getDtr() > 0) {
                 msg = msg + ChatColor.YELLOW + "DTR: " + ChatColor.GREEN + utils.formatDouble(faction.getDtr()) + "\n";
+            } else {
+                msg = msg + ChatColor.YELLOW + "DTR: " + ChatColor.RED + utils.formatDouble(faction.getDtr()) + "\n";
+            }
+
+            if(faction.isRaidable()) {
+                msg = msg + ChatColor.RED.toString() + ChatColor.BOLD + "[RAIDABLE]\n";
             }
 
             if(faction.getFreezetime() > 0) {
-                msg = msg + ChatColor.DARK_RED + "Freeze Timer: " + ChatColor.RED + utils.toMMSS(faction.getFreezetime());
+                msg = msg + ChatColor.RED.toString() + ChatColor.BOLD + "FreezeTime: " + utils.toMMSS(faction.getFreezetime()) + "\n";
             }
+
+            msg = msg + ChatColor.YELLOW + "[Announcement] " + ChatColor.LIGHT_PURPLE + faction.getMotd();
 
             player.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "--------------------------------------------------");
             player.sendMessage(msg);
@@ -1075,106 +1054,69 @@ public class FactionManager {
             player.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "--------------------------------------------------");
         } else {
 
-            int onlineCount = 0;
+            String factionName = faction.getName();
+            int online = faction.getOnlinePlayers().size();
+            int balance = faction.getBalance();
+            String leader = Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName();
 
-            List<String> online = new ArrayList<>();
-            List<String> offline = new ArrayList<>();
-            List<String> offlinecaptains = new ArrayList<>();
-            List<String> onlinecaptains = new ArrayList<>();
 
-            for(String str : faction.getMembers()) {
+            //Line 1
 
-                OfflinePlayer p = Bukkit.getOfflinePlayer(UUID.fromString(str));
+            msg = ChatColor.GOLD + factionName + ChatColor.GRAY + " (" + online + "/" + faction.getMembers().size() + ") ";
 
-                if(p.isOnline()) {
-
-                    System.out.println(p.getName());
-
-                    if(faction.getCaptains().contains(p.getUniqueId().toString())) {
-                        onlinecaptains.add(p.getName());
-                    } else {
-                        online.add(p.getName());
-                    }
-                } else {
-                    if(faction.getCaptains().contains(p.getUniqueId().toString())) {
-                        offlinecaptains.add(p.getName());
-                    } else {
-                        offline.add(p.getName());
-                    }
-                }
-
-            }
-
-            if(online.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
-                online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
-            }
-
-            if(offline.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
-                online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
-            }
-
-            if(offlinecaptains.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
-                online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
-            }
-
-            if(onlinecaptains.contains(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName())) {
-                online.remove(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName());
-            }
-
-            onlineCount = onlineCount + onlinecaptains.size() + online.size();
-
-            msg = ChatColor.GOLD.toString() + ChatColor.BOLD + faction.getName() + ChatColor.GRAY + " [" + online.size() + "/" + faction.getMembers().size() + "] " + ChatColor.YELLOW + "Home: ";
-
-            if(faction.getHome() == null) {
-                msg = msg + ChatColor.RED + "Not Set" + "\n";
+            if(faction.getHome() != null) {
+                msg = msg + ChatColor.GOLD + "Home: " + ChatColor.WHITE + faction.getHome().getBlockX() + ", " + faction.getHome().getBlockZ() + "\n";
             } else {
-                msg = msg + ChatColor.WHITE + faction.getHome().getBlockX() + ", " + faction.getHome().getBlockZ() + "\n";
+                msg = msg + ChatColor.GOLD + "Home: " + ChatColor.RED + "Not Set\n";
             }
 
-            msg = msg + ChatColor.YELLOW + "Balance: " + ChatColor.GREEN + "$" + faction.getBalance() + "\n";
+            //Line 2
+            msg = msg + ChatColor.YELLOW + "Balance: " + ChatColor.GREEN + "$" + balance + "\n";
 
-            if(Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).isOnline()) {
-                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GREEN + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
-            } else {
-                msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GRAY + Bukkit.getOfflinePlayer(UUID.fromString(faction.getLeader())).getName() + "\n";
+            msg = msg + ChatColor.YELLOW + "Leader: " + ChatColor.GRAY + leader + "\n";
+
+            String captains = "";
+
+            for(String s : faction.getCaptains()) {
+
+                OfflinePlayer pl = Bukkit.getOfflinePlayer(UUID.fromString(s));
+
+                captains = captains + ChatColor.GRAY + pl.getName() + ChatColor.WHITE + ", ";
+
+
             }
 
             if(faction.getCaptains().size() > 0) {
-                String cap = "";
+                msg = msg + ChatColor.YELLOW + "Captains: " + captains.substring(0, captains.length() - 2) + "\n";
+            }
 
-                for(String s : onlinecaptains) {
-                    cap = ChatColor.GREEN + cap + "," + s;
+            String members = "";
+
+            for(String s : faction.getMembers()) {
+
+                OfflinePlayer pl = Bukkit.getOfflinePlayer(UUID.fromString(s));
+
+                if(pl.isOnline()) {
+                    members = members + ChatColor.GREEN + pl.getName() + ChatColor.WHITE + ", ";
+                } else {
+                    members = members + ChatColor.GRAY + pl.getName() + ChatColor.WHITE + ", ";
                 }
-
-                for(String s : offlinecaptains) {
-                    cap = ChatColor.GRAY + cap + "," + s;
-                }
-
-                msg = msg + ChatColor.YELLOW + "Captains: " + cap + "\n";
             }
 
-            String memb = "";
+            msg = msg + ChatColor.YELLOW + "Members: " + members.substring(0, members.length() - 2) + "\n";
 
-            for(String s : online) {
-                memb = ChatColor.GREEN + memb + "," + s;
-            }
-
-            for(String s : offline) {
-                memb = ChatColor.GRAY + memb + "," + s;
-            }
-
-
-            msg = msg + ChatColor.YELLOW + "Members: " + memb + "\n";
-
-            if (faction.isRaidable()) {
-                msg = msg + ChatColor.YELLOW + "DTR: " + ChatColor.RED + utils.formatDouble(faction.getDtr()) + "\n"
-                        + ChatColor.RED.toString() + ChatColor.BOLD + "[RAIDABLE]" + "\n";
-            } else {
+            if(faction.getDtr() > 0) {
                 msg = msg + ChatColor.YELLOW + "DTR: " + ChatColor.GREEN + utils.formatDouble(faction.getDtr()) + "\n";
+            } else {
+                msg = msg + ChatColor.YELLOW + "DTR: " + ChatColor.RED + utils.formatDouble(faction.getDtr()) + "\n";
+            }
+
+            if(faction.isRaidable()) {
+                msg = msg + ChatColor.RED.toString() + ChatColor.BOLD + "[RAIDABLE]\n";
             }
 
             if(faction.getFreezetime() > 0) {
-                msg = msg + ChatColor.DARK_RED + "Freeze Timer: " + ChatColor.RED + utils.toMMSS(faction.getFreezetime()) + "\n";
+                msg = msg + ChatColor.RED.toString() + ChatColor.BOLD + "FreezeTime: " + utils.toMMSS(faction.getFreezetime()) + "\n";
             }
 
             msg = msg + ChatColor.YELLOW + "[Announcement] " + ChatColor.LIGHT_PURPLE + faction.getMotd();
@@ -1182,6 +1124,7 @@ public class FactionManager {
             player.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "--------------------------------------------------");
             player.sendMessage(msg);
             player.sendMessage(ChatColor.GRAY.toString() + ChatColor.STRIKETHROUGH + "--------------------------------------------------");
+
         }
 
     }
